@@ -7,7 +7,13 @@ A Notion-style workspace for Windows — pages, databases, and notes, built as a
 ## Features
 
 - **Block editor** — headings, lists, to-dos, toggles, quotes, code blocks, tables, images (uploaded to Convex file storage), video/audio/file embeds. Type `/` for the command menu, drag blocks with the side handle.
-- **Databases** — Notion-style tables embedded in any page via `/database`, with typed columns (text, number, select, date, checkbox, URL), colored tag chips, column resize/rename/retype, and live row counts.
+- **Databases** — Notion-style tables embedded in any page via `/database`, with typed columns (text, number, select, date, checkbox, URL), colored tag chips (pick from 10 colors per option, or delete options), column resize/rename/retype, and live row counts.
+- **Drawings** — `/drawing` embeds a full Excalidraw whiteboard, autosaved to Convex.
+- **Embeds** — `/youtube` embeds YouTube, Vimeo, or any web page; `/pdf` uploads a PDF with inline preview and download.
+- **AI workspace generator** — "AI workspace" in the sidebar: paste your Anthropic API key, describe a project, and Claude (Opus 4.8) plans and creates a full starter workspace — pages, sub-pages, content, and seeded databases.
+- **Drag & drop** — drag pages in the sidebar to reorder (drop near edges) or nest (drop on the middle); drop on empty space to move to the root.
+- **Display controls** — "Aa" in the topbar: editor font size, code block font size, and app zoom (`Ctrl +/−/0`).
+- **Export** — page menu (⋯): export as Markdown or HTML, live word count.
 - **Nested pages** — infinite hierarchy in the sidebar with expand/collapse, inline rename, duplicate (deep-copies subpages *and* databases), and move-to.
 - **Page identity** — emoji icons (full searchable picker) and covers (gradient gallery or your own uploaded image).
 - **Favorites** — star pages to pin them to a sidebar section.

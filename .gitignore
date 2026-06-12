@@ -4,3 +4,8 @@ release/
 .env.local
 convex/_generated/
 *.log
+# Code review and development tooling
+.code-review-graph/
+.codegraph/
+.claude/
+.mcp.json

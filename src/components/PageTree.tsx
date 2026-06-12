@@ -56,10 +56,12 @@ export function PageTreeItem({
   const moveToTrash = useMutation(api.pages.moveToTrash);
   const toggleFavorite = useMutation(api.pages.toggleFavorite);
   const rename = useMutation(api.pages.rename);
+  const moveRelative = useMutation(api.pages.moveRelative);
 
   const menu = useAnchor();
   const [renaming, setRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState("");
+  const [dropZone, setDropZone] = useState<"before" | "after" | "inside" | null>(null);
 
   const isExpanded = expanded[page._id] === true;
   const children = childrenMap.get(page._id) ?? [];
@@ -82,12 +84,41 @@ export function PageTreeItem({
   return (
     <>
       <div
-        className={`tree-item${isActive ? " active" : ""}`}
+        className={`tree-item${isActive ? " active" : ""}${dropZone ? ` drop-${dropZone}` : ""}`}
         style={{ paddingLeft: depth * 14 }}
         onClick={() => onSelect(page._id)}
         onContextMenu={(e) => {
           e.preventDefault();
           menu.setAnchor(new DOMRect(e.clientX, e.clientY, 0, 0));
+        }}
+        draggable
+        onDragStart={(e) => {
+          e.dataTransfer.setData("slate/page", page._id);
+          e.dataTransfer.effectAllowed = "move";
+        }}
+        onDragOver={(e) => {
+          if (!e.dataTransfer.types.includes("slate/page")) return;
+          e.preventDefault();
+          e.stopPropagation();
+          e.dataTransfer.dropEffect = "move";
+          const rect = e.currentTarget.getBoundingClientRect();
+          const rel = (e.clientY - rect.top) / rect.height;
+          setDropZone(rel < 0.3 ? "before" : rel > 0.7 ? "after" : "inside");
+        }}
+        onDragLeave={() => setDropZone(null)}
+        onDrop={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const draggedId = e.dataTransfer.getData("slate/page");
+          const zone = dropZone ?? "inside";
+          setDropZone(null);
+          if (!draggedId || draggedId === page._id) return;
+          if (zone === "inside" && !isExpanded) onToggle(page._id);
+          void moveRelative({
+            pageId: draggedId as Id<"pages">,
+            targetId: page._id,
+            position: zone,
+          });
         }}
       >
         <span

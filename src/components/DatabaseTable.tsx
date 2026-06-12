@@ -9,6 +9,7 @@ import {
   ChevronDown,
   Hash,
   Link as LinkIcon,
+  MoreHorizontal,
   Plus,
   Tag,
   Trash2,
@@ -16,7 +17,7 @@ import {
   Check,
 } from "lucide-react";
 import { Popover, useAnchor } from "./Popover";
-import { debounce, tagColor } from "../lib/utils";
+import { debounce, tagColor, TAG_PALETTE } from "../lib/utils";
 
 type ColumnType = Doc<"dbColumns">["type"];
 
@@ -103,14 +104,36 @@ function SelectCell({
   onAddOption: (option: string) => void;
 }) {
   const { anchor, open, close } = useAnchor();
+  const optionMenu = useAnchor();
+  const [editingOption, setEditingOption] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const updateColumn = useMutation(api.database.updateColumn);
   const options = column.options ?? [];
+  const colors = column.optionColors;
   const filtered = options.filter((o) =>
     o.toLowerCase().includes(search.trim().toLowerCase())
   );
   const canCreate =
     search.trim() !== "" &&
     !options.some((o) => o.toLowerCase() === search.trim().toLowerCase());
+
+  const setOptionColor = (option: string, colorId: string) => {
+    void updateColumn({
+      columnId: column._id,
+      optionColors: { ...(colors ?? {}), [option]: colorId },
+    });
+  };
+
+  const deleteOption = (option: string) => {
+    const nextColors = { ...(colors ?? {}) };
+    delete nextColors[option];
+    void updateColumn({
+      columnId: column._id,
+      options: options.filter((o) => o !== option),
+      optionColors: nextColors,
+    });
+    if (value === option) onCommit(null);
+  };
 
   return (
     <>
@@ -124,7 +147,10 @@ function SelectCell({
         {value ? (
           <span
             className="tag-chip"
-            style={{ background: tagColor(value).bg, color: tagColor(value).fg }}
+            style={{
+              background: tagColor(value, colors).bg,
+              color: tagColor(value, colors).fg,
+            }}
           >
             {value}
           </span>
@@ -158,25 +184,36 @@ function SelectCell({
             </button>
           )}
           {filtered.map((option) => (
-            <button
-              key={option}
-              className="option-row"
-              onClick={() => {
-                onCommit(option);
-                close();
-              }}
-            >
-              <span
-                className="tag-chip"
-                style={{
-                  background: tagColor(option).bg,
-                  color: tagColor(option).fg,
+            <div key={option} className="option-row-wrap">
+              <button
+                className="option-row"
+                onClick={() => {
+                  onCommit(option);
+                  close();
                 }}
               >
-                {option}
-              </span>
-              {option === value && <Check size={14} className="check" />}
-            </button>
+                <span
+                  className="tag-chip"
+                  style={{
+                    background: tagColor(option, colors).bg,
+                    color: tagColor(option, colors).fg,
+                  }}
+                >
+                  {option}
+                </span>
+                {option === value && <Check size={14} className="check" />}
+              </button>
+              <button
+                className="option-settings-btn"
+                title="Edit option"
+                onClick={(e) => {
+                  setEditingOption(option);
+                  optionMenu.open(e);
+                }}
+              >
+                <MoreHorizontal size={13} />
+              </button>
+            </div>
           ))}
           {canCreate && (
             <button
@@ -191,14 +228,58 @@ function SelectCell({
               <span
                 className="tag-chip"
                 style={{
-                  background: tagColor(search.trim()).bg,
-                  color: tagColor(search.trim()).fg,
+                  background: tagColor(search.trim(), colors).bg,
+                  color: tagColor(search.trim(), colors).fg,
                 }}
               >
                 {search.trim()}
               </span>
             </button>
           )}
+        </Popover>
+      )}
+      {optionMenu.anchor && editingOption && (
+        <Popover
+          anchor={optionMenu.anchor}
+          onClose={() => {
+            optionMenu.close();
+            setEditingOption(null);
+          }}
+          className="color-popover"
+        >
+          <div className="menu-label">Color</div>
+          <div className="color-grid">
+            {TAG_PALETTE.map((c) => (
+              <button
+                key={c.id}
+                className="color-swatch-row"
+                onClick={() => {
+                  setOptionColor(editingOption, c.id);
+                  optionMenu.close();
+                  setEditingOption(null);
+                }}
+              >
+                <span className="color-dot" style={{ background: c.bg }}>
+                  <span style={{ color: c.fg }}>A</span>
+                </span>
+                {c.label}
+                {colors?.[editingOption] === c.id && (
+                  <Check size={13} style={{ marginLeft: "auto" }} />
+                )}
+              </button>
+            ))}
+          </div>
+          <div className="menu-sep" />
+          <button
+            className="menu-item danger"
+            onClick={() => {
+              deleteOption(editingOption);
+              optionMenu.close();
+              setEditingOption(null);
+            }}
+          >
+            <Trash2 size={13} /> Delete option
+          </button>
         </Popover>
       )}
     </>

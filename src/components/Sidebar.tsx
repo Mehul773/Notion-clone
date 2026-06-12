@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
-import { Plus, Search, SquarePen, Trash2 } from "lucide-react";
+import { Plus, Search, Sparkles, SquarePen, Trash2 } from "lucide-react";
 import { buildChildrenMap, Page, PageTreeItem } from "./PageTree";
 
 const EXPANDED_KEY = "slate:expanded";
@@ -13,6 +13,7 @@ export function Sidebar({
   onSelect,
   onOpenSearch,
   onOpenTrash,
+  onOpenAi,
   onMove,
   width,
   setWidth,
@@ -22,11 +23,14 @@ export function Sidebar({
   onSelect: (id: Id<"pages">) => void;
   onOpenSearch: () => void;
   onOpenTrash: () => void;
+  onOpenAi: () => void;
   onMove: (id: Id<"pages">) => void;
   width: number;
   setWidth: (w: number) => void;
 }) {
   const create = useMutation(api.pages.create);
+  const moveRelative = useMutation(api.pages.moveRelative);
+  const [rootDropActive, setRootDropActive] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>(() => {
     try {
       return JSON.parse(localStorage.getItem(EXPANDED_KEY) ?? "{}");
@@ -95,8 +99,37 @@ export function Sidebar({
           <SquarePen size={15} /> New page
           <span className="kbd-hint">Ctrl N</span>
         </button>
+        <button className="sidebar-item" onClick={onOpenAi}>
+          <Sparkles size={15} /> AI workspace
+        </button>
       </div>
-      <div className="sidebar-scroll">
+      <div
+        className={`sidebar-scroll${rootDropActive ? " root-drop" : ""}`}
+        onDragOver={(e) => {
+          if (!e.dataTransfer.types.includes("slate/page")) return;
+          // Only when dropping on the empty area, not on a tree item.
+          if (e.target === e.currentTarget) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+            setRootDropActive(true);
+          }
+        }}
+        onDragLeave={(e) => {
+          if (e.target === e.currentTarget) setRootDropActive(false);
+        }}
+        onDrop={(e) => {
+          if (e.target !== e.currentTarget) return;
+          e.preventDefault();
+          setRootDropActive(false);
+          const draggedId = e.dataTransfer.getData("slate/page");
+          if (draggedId) {
+            void moveRelative({
+              pageId: draggedId as Id<"pages">,
+              position: "root",
+            });
+          }
+        }}
+      >
         {favorites.length > 0 && (
           <>
             <div className="sidebar-section-label">Favorites</div>

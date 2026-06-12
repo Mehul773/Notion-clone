@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef } from "react";
 import {
   BlockNoteSchema,
-  defaultBlockSpecs,
   combineByGroup,
+  defaultBlockSpecs,
   filterSuggestionItems,
   insertOrUpdateBlockForSlashMenu,
   PartialBlock,
@@ -20,9 +20,13 @@ import "@blocknote/mantine/style.css";
 import { useConvex, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
-import { Table } from "lucide-react";
+import { FileText, MonitorPlay, PenTool, Table } from "lucide-react";
 import { DatabaseTable } from "./DatabaseTable";
+import { EmbedView } from "./blocks/EmbedBlock";
+import { PdfView } from "./blocks/PdfBlock";
+import { DrawingView } from "./blocks/DrawingBlock";
 import { debounce } from "../lib/utils";
+import { clearCurrentEditor, setCurrentEditor } from "../lib/editorRegistry";
 
 /** Notion-style database, embedded in the document as a custom block. */
 const DatabaseBlock = createReactBlockSpec(
@@ -38,10 +42,56 @@ const DatabaseBlock = createReactBlockSpec(
   }
 );
 
+/** YouTube / Vimeo / web embeds rendered in an iframe. */
+const EmbedBlock = createReactBlockSpec(
+  {
+    type: "embed",
+    propSchema: {
+      url: { default: "" },
+    },
+    content: "none",
+  },
+  {
+    render: (props) => <EmbedView block={props.block} editor={props.editor} />,
+  }
+);
+
+/** PDF documents with inline preview. */
+const PdfBlock = createReactBlockSpec(
+  {
+    type: "pdf",
+    propSchema: {
+      url: { default: "" },
+      name: { default: "" },
+    },
+    content: "none",
+  },
+  {
+    render: (props) => <PdfView block={props.block} editor={props.editor} />,
+  }
+);
+
+/** Excalidraw whiteboard. */
+const DrawingBlock = createReactBlockSpec(
+  {
+    type: "drawing",
+    propSchema: {
+      drawingId: { default: "" },
+    },
+    content: "none",
+  },
+  {
+    render: (props) => <DrawingView drawingId={props.block.props.drawingId} />,
+  }
+);
+
 const schema = BlockNoteSchema.create({
   blockSpecs: {
     ...defaultBlockSpecs,
     database: DatabaseBlock(),
+    embed: EmbedBlock(),
+    pdf: PdfBlock(),
+    drawing: DrawingBlock(),
   },
 });
 
@@ -97,7 +147,9 @@ export function BlockEditor({
   );
 
   useEffect(() => {
+    setCurrentEditor(editor);
     return () => {
+      clearCurrentEditor(editor);
       // Flush pending edits when switching pages or closing.
       debouncedSave.cancel();
       void saveRef.current({ pageId, content: JSON.stringify(editor.document) });
@@ -116,27 +168,64 @@ export function BlockEditor({
         <SuggestionMenuController
           triggerCharacter="/"
           getItems={async (query) => {
-            const databaseItem: DefaultReactSuggestionItem = {
-              title: "Database",
-              subtext: "Table with typed columns, like Notion",
-              aliases: ["database", "table", "db", "grid"],
-              group: "Advanced",
-              icon: <Table size={18} />,
-              onItemClick: async () => {
-                const tableId = await convex.mutation(
-                  api.database.createTable,
-                  {}
-                );
-                insertOrUpdateBlockForSlashMenu(editor, {
-                  type: "database",
-                  props: { tableId },
-                });
+            const customItems: DefaultReactSuggestionItem[] = [
+              {
+                title: "Database",
+                subtext: "Table with typed columns, like Notion",
+                aliases: ["database", "table", "db", "grid"],
+                group: "Advanced",
+                icon: <Table size={18} />,
+                onItemClick: async () => {
+                  const tableId = await convex.mutation(
+                    api.database.createTable,
+                    {}
+                  );
+                  insertOrUpdateBlockForSlashMenu(editor, {
+                    type: "database",
+                    props: { tableId },
+                  });
+                },
               },
-            };
+              {
+                title: "Drawing",
+                subtext: "Excalidraw whiteboard for sketches and diagrams",
+                aliases: ["drawing", "excalidraw", "sketch", "whiteboard", "draw", "diagram"],
+                group: "Advanced",
+                icon: <PenTool size={18} />,
+                onItemClick: async () => {
+                  const drawingId = await convex.mutation(
+                    api.drawings.create,
+                    {}
+                  );
+                  insertOrUpdateBlockForSlashMenu(editor, {
+                    type: "drawing",
+                    props: { drawingId },
+                  });
+                },
+              },
+              {
+                title: "YouTube / Embed",
+                subtext: "Embed YouTube, Vimeo, or any web page",
+                aliases: ["youtube", "embed", "video", "vimeo", "iframe", "web"],
+                group: "Media",
+                icon: <MonitorPlay size={18} />,
+                onItemClick: () => {
+                  insertOrUpdateBlockForSlashMenu(editor, { type: "embed" });
+                },
+              },
+              {
+                title: "PDF",
+                subtext: "Upload a PDF with inline preview",
+                aliases: ["pdf", "document", "doc", "preview"],
+                group: "Media",
+                icon: <FileText size={18} />,
+                onItemClick: () => {
+                  insertOrUpdateBlockForSlashMenu(editor, { type: "pdf" });
+                },
+              },
+            ];
             return filterSuggestionItems(
-              combineByGroup(getDefaultReactSlashMenuItems(editor), [
-                databaseItem,
-              ]),
+              combineByGroup(getDefaultReactSlashMenuItems(editor), customItems),
               query
             );
           }}
