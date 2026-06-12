@@ -110,34 +110,102 @@ Track every candidate from screen to offer.
 `,
   },
   {
-    id: "weekly-planner",
-    name: "Weekly Planner",
+    id: "weekly-task-manager",
+    name: "Weekly Task Manager",
     icon: "🗓️",
-    description: "Priorities, schedule, and a Friday review.",
+    description: "Day-by-day checklists, priorities, and notes.",
     markdown: `---
-title: Weekly Planner
+title: Weekly Task Manager
 icon: 🗓️
 ---
 
-## Top 3 priorities
+> One page per week. Check things off, dump thoughts in Notes, review Friday.
+
+## 🔥 Top 3 this week
 
 - [ ] Priority one
 - [ ] Priority two
 - [ ] Priority three
 
-## Schedule
+## Monday
 
-| Day | Focus | Notes |
-|-----|-------|-------|
-| Monday | | |
-| Tuesday | | |
-| Wednesday | | |
-| Thursday | | |
-| Friday | | |
+- [ ] To-do
+- [ ] To-do
 
-## Friday review
+## Tuesday
 
-> What worked? What didn't? What changes next week?
+- [ ] To-do
+- [ ] To-do
+
+## Wednesday
+
+- [ ] To-do
+- [ ] To-do
+
+## Thursday
+
+- [ ] To-do
+- [ ] To-do
+
+## Friday
+
+- [ ] To-do
+- [ ] Weekly review: what worked, what didn't?
+
+## Weekend
+
+- [ ] To-do
+
+## 📝 Notes
+
+- Things to remember…
+- Don't forget to book that appointment.
+
+## 📋 Task board
+
+Switch this table to **Board view** (icons top-right) for a kanban of your week.
+
+| Task | Status | Day | Done |
+|------|--------|-----|------|
+| Example task | Todo | 2026-06-15 | false |
+| Another task | Doing | 2026-06-17 | false |
+| Finished thing | Done | 2026-06-13 | true |
+`,
+  },
+  {
+    id: "habit-tracker",
+    name: "Habit Tracker",
+    icon: "📈",
+    description: "Track daily habits across the week, with a score.",
+    markdown: `---
+title: Habit Tracker
+icon: 📈
+---
+
+> Tick a box every time you do the habit. Streaks feel GOOD.
+
+## This week
+
+| Habit | Mon | Tue | Wed | Thu | Fri | Sat | Sun |
+|-------|-----|-----|-----|-----|-----|-----|-----|
+| 💧 Drink 2L water | true | true | false | false | false | false | false |
+| 🏃 Move 30 minutes | true | false | false | false | false | false | false |
+| 📚 Read 10 pages | false | true | false | false | false | false | false |
+| 😴 Sleep before 11pm | true | true | false | false | false | false | false |
+| 📵 No phone first hour | false | false | false | false | false | false | false |
+
+## Power-ups
+
+- [ ] Add a **Formula** column: \`[Mon]+[Tue]+[Wed]+[Thu]+[Fri]+[Sat]+[Sun]\` → weekly score per habit
+- [ ] Switch to **Chart view** to see which habit is winning
+- [ ] Duplicate this page every Monday (⋯ menu → Duplicate)
+
+## Monthly goals
+
+- [ ] Week 1 — show up every day
+- [ ] Week 2 — beat week 1's score
+- [ ] Week 3 — no zero days
+- [ ] Week 4 — full house on one habit
 `,
   },
   {

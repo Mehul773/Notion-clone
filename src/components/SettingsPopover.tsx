@@ -5,6 +5,7 @@ export type FontSettings = {
   editorSize: number;
   codeSize: number;
   fontFamily: "default" | "serif" | "mono";
+  googleFont: string;
   simpleMode: boolean;
 };
 
@@ -12,8 +13,29 @@ export const DEFAULT_FONT_SETTINGS: FontSettings = {
   editorSize: 15.5,
   codeSize: 13.5,
   fontFamily: "default",
+  googleFont: "",
   simpleMode: false,
 };
+
+/** Accepts a font name ("Lobster") or a fonts.google.com URL and returns
+ * the font family name, or null if it can't be understood. */
+export function parseGoogleFont(input: string): string | null {
+  const raw = input.trim();
+  if (!raw) return null;
+  if (raw.includes("fonts.google")) {
+    try {
+      const url = new URL(raw.startsWith("http") ? raw : `https://${raw}`);
+      const family =
+        url.searchParams.get("family") ??
+        decodeURIComponent(url.pathname.split("/specimen/")[1] ?? "");
+      const name = family.split(":")[0].replace(/\+/g, " ").trim();
+      return name || null;
+    } catch {
+      return null;
+    }
+  }
+  return /^[a-zA-Z0-9 ]{2,40}$/.test(raw) ? raw : null;
+}
 
 function Stepper({
   label,
@@ -87,6 +109,28 @@ export function SettingsPopover({
           </button>
         ))}
       </div>
+      <input
+        className="google-font-input"
+        placeholder="Google Font name or link… (Enter)"
+        defaultValue={settings.googleFont}
+        onKeyDown={(e) => {
+          if (e.key !== "Enter") return;
+          const value = (e.target as HTMLInputElement).value;
+          const name = parseGoogleFont(value);
+          setSettings({ ...settings, googleFont: name ?? "" });
+        }}
+        onBlur={(e) => {
+          const name = parseGoogleFont(e.target.value);
+          if (name !== (settings.googleFont || null)) {
+            setSettings({ ...settings, googleFont: name ?? "" });
+          }
+        }}
+      />
+      {settings.googleFont && (
+        <div className="google-font-active">
+          Using <b style={{ fontFamily: `'${settings.googleFont}'` }}>{settings.googleFont}</b>
+        </div>
+      )}
       <div className="menu-sep" />
       <div className="menu-label">Text</div>
       <Stepper

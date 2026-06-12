@@ -207,6 +207,7 @@ icon: 🚀
 - 1. item for numbered lists
 - - [ ] task / - [x] done task for checklists
 - > text for quotes
+- \`\`\` fenced code blocks
 - --- on its own line for dividers
 - Pipe tables with a header row for structured data, e.g.:
 

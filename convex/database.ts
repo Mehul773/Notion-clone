@@ -79,13 +79,23 @@ export const setView = mutation({
 });
 
 export const addColumn = mutation({
-  args: { tableId: v.id("dbTables") },
+  args: { tableId: v.id("dbTables"), atOrder: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const columns = await ctx.db
       .query("dbColumns")
       .withIndex("by_table", (q) => q.eq("tableId", args.tableId))
       .collect();
-    const order = columns.reduce((max, c) => Math.max(max, c.order), 0) + 1;
+    let order: number;
+    if (args.atOrder !== undefined) {
+      order = args.atOrder;
+      for (const col of columns) {
+        if (col.order >= order) {
+          await ctx.db.patch(col._id, { order: col.order + 1 });
+        }
+      }
+    } else {
+      order = columns.reduce((max, c) => Math.max(max, c.order), 0) + 1;
+    }
     return await ctx.db.insert("dbColumns", {
       tableId: args.tableId,
       name: "Column",
@@ -93,6 +103,36 @@ export const addColumn = mutation({
       order,
       width: 180,
     });
+  },
+});
+
+/** Move a column before/after another, resequencing all orders. */
+export const moveColumn = mutation({
+  args: {
+    columnId: v.id("dbColumns"),
+    targetId: v.id("dbColumns"),
+    side: v.union(v.literal("before"), v.literal("after")),
+  },
+  handler: async (ctx, args) => {
+    if (args.columnId === args.targetId) return;
+    const moved = await ctx.db.get(args.columnId);
+    const target = await ctx.db.get(args.targetId);
+    if (!moved || !target || moved.tableId !== target.tableId) return;
+    const columns = (
+      await ctx.db
+        .query("dbColumns")
+        .withIndex("by_table", (q) => q.eq("tableId", moved.tableId))
+        .collect()
+    ).sort((a, b) => a.order - b.order);
+    const rest = columns.filter((c) => c._id !== args.columnId);
+    const targetIndex = rest.findIndex((c) => c._id === args.targetId);
+    const insertAt = args.side === "before" ? targetIndex : targetIndex + 1;
+    rest.splice(insertAt, 0, moved);
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i].order !== i + 1) {
+        await ctx.db.patch(rest[i]._id, { order: i + 1 });
+      }
+    }
   },
 });
 
@@ -146,11 +186,26 @@ async function maxRowOrder(ctx: MutationCtx, tableId: Id<"dbTables">) {
 }
 
 export const addRow = mutation({
-  args: { tableId: v.id("dbTables") },
+  args: { tableId: v.id("dbTables"), atOrder: v.optional(v.number()) },
   handler: async (ctx, args) => {
+    let order: number;
+    if (args.atOrder !== undefined) {
+      order = args.atOrder;
+      const rows = await ctx.db
+        .query("dbRows")
+        .withIndex("by_table", (q) => q.eq("tableId", args.tableId))
+        .collect();
+      for (const row of rows) {
+        if (row.order >= order) {
+          await ctx.db.patch(row._id, { order: row.order + 1 });
+        }
+      }
+    } else {
+      order = (await maxRowOrder(ctx, args.tableId)) + 1;
+    }
     return await ctx.db.insert("dbRows", {
       tableId: args.tableId,
-      order: (await maxRowOrder(ctx, args.tableId)) + 1,
+      order,
       cells: {},
     });
   },

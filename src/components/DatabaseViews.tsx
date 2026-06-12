@@ -33,8 +33,10 @@ export function BoardView({
   const updateCell = useMutation(api.database.updateCell);
   const addRow = useMutation(api.database.addRow);
   const [dragOverLane, setDragOverLane] = useState<string | null>(null);
+  const [groupColId, setGroupColId] = useState<string | null>(null);
 
-  const groupCol = columns.find((c) => c.type === "select");
+  const selectCols = columns.filter((c) => c.type === "select");
+  const groupCol = selectCols.find((c) => c._id === groupColId) ?? selectCols[0];
   if (!groupCol) {
     return (
       <div className="db-view-note">
@@ -63,6 +65,23 @@ export function BoardView({
   };
 
   return (
+    <>
+      {selectCols.length > 1 && (
+        <div className="db-board-toolbar">
+          <select
+            className="db-col-select"
+            value={groupCol._id}
+            onChange={(e) => setGroupColId(e.target.value)}
+            title="Group cards by"
+          >
+            {selectCols.map((c) => (
+              <option key={c._id} value={c._id}>
+                Group by {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
     <div className="db-board">
       {lanes.map((lane) => {
         const laneKey = lane ?? "__none__";
@@ -131,6 +150,7 @@ export function BoardView({
         );
       })}
     </div>
+    </>
   );
 }
 
@@ -146,8 +166,10 @@ export function CalendarView({
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
+  const [dateColId, setDateColId] = useState<string | null>(null);
 
-  const dateCol = columns.find((c) => c.type === "date");
+  const dateCols = columns.filter((c) => c.type === "date");
+  const dateCol = dateCols.find((c) => c._id === dateColId) ?? dateCols[0];
   if (!dateCol) {
     return (
       <div className="db-view-note">
@@ -186,6 +208,20 @@ export function CalendarView({
         <span className="db-cal-month">
           {cursor.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
         </span>
+        {dateCols.length > 1 && (
+          <select
+            className="db-col-select"
+            value={dateCol._id}
+            onChange={(e) => setDateColId(e.target.value)}
+            title="Which date column to plot"
+          >
+            {dateCols.map((c) => (
+              <option key={c._id} value={c._id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        )}
         <button onClick={() => setCursor(new Date(year, month - 1, 1))}>
           <ChevronLeft size={14} />
         </button>
@@ -246,8 +282,16 @@ export function ChartView({
   columns: Column[];
   rows: Row[];
 }) {
-  const selectCol = columns.find((c) => c.type === "select");
-  const numberCol = columns.find((c) => c.type === "number");
+  const selectCols = columns.filter((c) => c.type === "select");
+  const numberCols = columns.filter((c) => c.type === "number");
+  const [groupColId, setGroupColId] = useState<string | null>(null);
+  const [valueColId, setValueColId] = useState<string>("__auto__");
+
+  const selectCol = selectCols.find((c) => c._id === groupColId) ?? selectCols[0];
+  const numberCol =
+    valueColId === "__count__"
+      ? undefined
+      : numberCols.find((c) => c._id === valueColId) ?? numberCols[0];
 
   let bars: { label: string; value: number; bg: string; fg: string }[] = [];
   let caption = "";
@@ -291,7 +335,39 @@ export function ChartView({
 
   return (
     <div className="db-chart">
-      <div className="db-chart-caption">{caption}</div>
+      <div className="db-chart-caption">
+        {caption}
+        <span style={{ flex: 1 }} />
+        {selectCols.length > 1 && (
+          <select
+            className="db-col-select"
+            value={selectCol?._id ?? ""}
+            onChange={(e) => setGroupColId(e.target.value)}
+            title="Group bars by"
+          >
+            {selectCols.map((c) => (
+              <option key={c._id} value={c._id}>
+                by {c.name}
+              </option>
+            ))}
+          </select>
+        )}
+        {selectCol && numberCols.length > 0 && (
+          <select
+            className="db-col-select"
+            value={numberCol?._id ?? "__count__"}
+            onChange={(e) => setValueColId(e.target.value)}
+            title="Bar value"
+          >
+            <option value="__count__">Count rows</option>
+            {numberCols.map((c) => (
+              <option key={c._id} value={c._id}>
+                Sum {c.name}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
       {bars.map((bar) => (
         <div key={bar.label} className="db-chart-row">
           <span className="db-chart-label" title={bar.label}>

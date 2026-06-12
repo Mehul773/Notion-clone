@@ -4,6 +4,8 @@ import { api } from "../../convex/_generated/api";
 import { Id, Doc } from "../../convex/_generated/dataModel";
 import {
   AlignLeft,
+  ArrowLeftToLine,
+  ArrowRightToLine,
   BarChart3,
   Calendar,
   CalendarDays,
@@ -303,17 +305,112 @@ function SelectCell({
   );
 }
 
+/* ---------- Formula input with [Column] autocomplete ---------- */
+function FormulaInput({
+  column,
+  siblings,
+}: {
+  column: Doc<"dbColumns">;
+  siblings: Doc<"dbColumns">[];
+}) {
+  const updateColumn = useMutation(api.database.updateColumn);
+  const [value, setValue] = useState(column.formula ?? "");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const refresh = (text: string, caret: number) => {
+    const match = text.slice(0, caret).match(/\[([^\]]*)$/);
+    if (!match) {
+      setSuggestions([]);
+      return;
+    }
+    const q = match[1].toLowerCase();
+    setSuggestions(
+      siblings
+        .filter(
+          (c) =>
+            c._id !== column._id &&
+            c.type !== "formula" &&
+            c.name.toLowerCase().includes(q)
+        )
+        .map((c) => c.name)
+        .slice(0, 6)
+    );
+  };
+
+  const complete = (name: string) => {
+    const el = inputRef.current;
+    if (!el) return;
+    const caret = el.selectionStart ?? value.length;
+    const start = value.slice(0, caret).lastIndexOf("[");
+    const next = value.slice(0, start + 1) + name + "]" + value.slice(caret);
+    setValue(next);
+    setSuggestions([]);
+    void updateColumn({ columnId: column._id, formula: next });
+    el.focus();
+  };
+
+  return (
+    <div className="formula-wrap">
+      <input
+        ref={inputRef}
+        className="col-name-input"
+        placeholder="[Price] * (1 - [Discount])"
+        value={value}
+        onChange={(e) => {
+          setValue(e.target.value);
+          refresh(e.target.value, e.target.selectionStart ?? 0);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Tab" && suggestions.length > 0) {
+            e.preventDefault();
+            complete(suggestions[0]);
+          } else if (e.key === "Enter") {
+            (e.target as HTMLInputElement).blur();
+          } else if (e.key === "Escape") {
+            setSuggestions([]);
+          }
+        }}
+        onBlur={() => {
+          setSuggestions([]);
+          void updateColumn({ columnId: column._id, formula: value });
+        }}
+      />
+      {suggestions.length > 0 && (
+        <div className="formula-suggestions">
+          {suggestions.map((name) => (
+            <button
+              key={name}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                complete(name);
+              }}
+            >
+              [{name}] <span className="formula-sug-hint">Tab</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ---------- Column header with settings popover + resize handle ---------- */
 function ColumnHeader({
   column,
+  siblings,
   onDeleteAllowed,
 }: {
   column: Doc<"dbColumns">;
+  siblings: Doc<"dbColumns">[];
   onDeleteAllowed: boolean;
 }) {
   const { anchor, open, close } = useAnchor();
   const updateColumn = useMutation(api.database.updateColumn);
   const deleteColumn = useMutation(api.database.deleteColumn);
+  const addColumn = useMutation(api.database.addColumn);
+  const moveColumn = useMutation(api.database.moveColumn);
+  const [colDropSide, setColDropSide] = useState<"before" | "after" | null>(null);
   const [name, setName] = useState(column.name);
   const [dragging, setDragging] = useState(false);
   const [liveWidth, setLiveWidth] = useState<number | null>(null);
@@ -350,7 +447,36 @@ function ColumnHeader({
   };
 
   return (
-    <div className="db-header-cell" style={{ width }} onClick={open}>
+    <div
+      className={`db-header-cell${colDropSide ? ` col-drop-${colDropSide}` : ""}`}
+      style={{ width }}
+      onClick={open}
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData("slate/dbcol", column._id);
+        e.dataTransfer.effectAllowed = "move";
+      }}
+      onDragOver={(e) => {
+        if (!e.dataTransfer.types.includes("slate/dbcol")) return;
+        e.preventDefault();
+        const rect = e.currentTarget.getBoundingClientRect();
+        setColDropSide(e.clientX - rect.left < rect.width / 2 ? "before" : "after");
+      }}
+      onDragLeave={() => setColDropSide(null)}
+      onDrop={(e) => {
+        e.preventDefault();
+        const draggedId = e.dataTransfer.getData("slate/dbcol");
+        const side = colDropSide ?? "before";
+        setColDropSide(null);
+        if (draggedId && draggedId !== column._id) {
+          void moveColumn({
+            columnId: draggedId as Id<"dbColumns">,
+            targetId: column._id,
+            side,
+          });
+        }
+      }}
+    >
       {typeIcon(column.type)}
       <span className="col-name">{column.name}</span>
       <div
@@ -375,21 +501,8 @@ function ColumnHeader({
           />
           {column.type === "formula" && (
             <>
-              <div className="menu-label">Formula</div>
-              <input
-                className="col-name-input"
-                placeholder="[Price] * (1 - [Discount])"
-                defaultValue={column.formula ?? ""}
-                onBlur={(e) =>
-                  void updateColumn({
-                    columnId: column._id,
-                    formula: e.target.value,
-                  })
-                }
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") (e.target as HTMLInputElement).blur();
-                }}
-              />
+              <div className="menu-label">Formula — type [ for columns</div>
+              <FormulaInput column={column} siblings={siblings} />
             </>
           )}
           <div className="menu-label">Type</div>
@@ -413,6 +526,24 @@ function ColumnHeader({
             </button>
           ))}
           <div className="menu-sep" />
+          <button
+            className="menu-item"
+            onClick={() => {
+              void addColumn({ tableId: column.tableId, atOrder: column.order });
+              close();
+            }}
+          >
+            <ArrowLeftToLine size={14} /> Insert column left
+          </button>
+          <button
+            className="menu-item"
+            onClick={() => {
+              void addColumn({ tableId: column.tableId, atOrder: column.order + 1 });
+              close();
+            }}
+          >
+            <ArrowRightToLine size={14} /> Insert column right
+          </button>
           <button
             className="menu-item"
             onClick={() => {
@@ -557,6 +688,7 @@ export function DatabaseTable({ tableId }: { tableId: string }) {
               <ColumnHeader
                 key={col._id}
                 column={col}
+                siblings={sortedColumns}
                 onDeleteAllowed={visibleColumns.length > 1}
               />
             ))}
@@ -572,6 +704,18 @@ export function DatabaseTable({ tableId }: { tableId: string }) {
             <div className="db-row" key={row._id}>
               <div className="db-row-gutter">
                 <span className="db-row-num">{rowIndex + 1}</span>
+                <button
+                  className="db-row-delete"
+                  title="Insert row below (Alt+click: above)"
+                  onClick={(e) =>
+                    void addRow({
+                      tableId: table._id,
+                      atOrder: e.altKey ? row.order : row.order + 1,
+                    })
+                  }
+                >
+                  <Plus size={13} />
+                </button>
                 <button
                   className="db-row-delete"
                   title="Delete row"

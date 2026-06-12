@@ -974,13 +974,14 @@ kbd {
 }
 .db-row-gutter {
   position: absolute;
-  left: -26px;
+  left: -48px;
   top: 0;
   bottom: 0;
-  width: 26px;
+  width: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 2px;
 }
 .db-row-delete {
   width: 20px;
@@ -1664,7 +1665,8 @@ kbd {
   background: var(--bg-secondary, var(--bg-input));
   color: var(--text-secondary);
   font-size: 12px;
-  opacity: 0.35;
+  opacity: 0.9;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
   transition: opacity 140ms;
 }
 .focus-exit-btn:hover {
@@ -2191,6 +2193,163 @@ kbd {
   font-size: 12.5px;
   color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
+}
+
+/* ===== Tour memes ===== */
+.driver-popover .tour-gif {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: var(--bg-input);
+}
+.driver-popover .tour-text {
+  margin-bottom: 8px;
+}
+.driver-popover .tour-gif-btn {
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.driver-popover .tour-gif-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+.driver-popover {
+  max-width: 320px;
+}
+
+/* ===== Shortcuts modal ===== */
+.shortcut-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 10px;
+}
+.shortcut-keys {
+  display: flex;
+  gap: 3px;
+  min-width: 150px;
+}
+.shortcut-keys kbd {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text);
+}
+.shortcut-desc {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+/* ===== Sidebar section toggle ===== */
+.section-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+.section-toggle:hover {
+  color: var(--text);
+}
+
+/* ===== Google font input ===== */
+.google-font-input {
+  width: calc(100% - 20px);
+  margin: 2px 10px 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 11.5px;
+  color: var(--text);
+  outline: none;
+}
+.google-font-input:focus {
+  border-color: var(--accent);
+}
+.google-font-active {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  padding: 0 12px 6px;
+}
+
+/* ===== DB view column pickers + board toolbar ===== */
+.db-col-select {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  outline: none;
+  max-width: 150px;
+}
+.db-board-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 2px;
+}
+.db-chart-caption {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ===== Formula autocomplete ===== */
+.formula-wrap {
+  position: relative;
+}
+.formula-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 8px;
+  right: 8px;
+  z-index: 30;
+  background: var(--bg-secondary, var(--bg));
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+.formula-suggestions button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  font-size: 12px;
+  padding: 5px 9px;
+  color: var(--text);
+  background: transparent;
+}
+.formula-suggestions button:hover {
+  background: var(--bg-hover);
+}
+.formula-sug-hint {
+  margin-left: auto;
+  font-size: 9.5px;
+  color: var(--text-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0 4px;
+}
+
+/* ===== Column drag reorder ===== */
+.db-header-cell.col-drop-before {
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.db-header-cell.col-drop-after {
+  box-shadow: inset -2px 0 0 var(--accent);
 }
 
 /* ===== Misc ===== */

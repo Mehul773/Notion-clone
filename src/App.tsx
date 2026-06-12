@@ -14,6 +14,8 @@ import {
   PanelLeftOpen,
   MoreHorizontal,
   Plus,
+  Search as SearchIcon,
+  SquarePen,
   Star,
   Sun,
   Trash2,
@@ -27,6 +29,7 @@ import { MoveDialog } from "./components/MoveDialog";
 import { AiDialog } from "./components/AiDialog";
 import { ImportMarkdownDialog } from "./components/ImportMarkdownDialog";
 import { TemplatesDialog } from "./components/TemplatesDialog";
+import { ShortcutsModal } from "./components/ShortcutsModal";
 import {
   DEFAULT_FONT_SETTINGS,
   FontSettings,
@@ -35,8 +38,8 @@ import {
 import { Popover, useAnchor } from "./components/Popover";
 import { getCurrentEditor } from "./lib/editorRegistry";
 import { randomCoverCss } from "./lib/utils";
-import { SAMPLE_PAGE_MARKDOWN, startTour, TOUR_DONE_KEY } from "./lib/tour";
-import { importMarkdownPage } from "./lib/markdownImport";
+import { startTour, TOUR_DONE_KEY } from "./lib/tour";
+import { createShowcasePage, SHOWCASE_TITLE } from "./lib/showcase";
 
 const ACTIVE_KEY = "slate:activePage";
 const THEME_KEY = "slate:theme";
@@ -115,6 +118,7 @@ export default function App() {
     () => localStorage.getItem("slate:sidebarOpen") !== "0"
   );
   const [templateSaved, setTemplateSaved] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [movePageId, setMovePageId] = useState<Id<"pages"> | null>(null);
   const [wordCount, setWordCount] = useState<number | null>(null);
   const fontMenu = useAnchor();
@@ -154,7 +158,25 @@ export default function App() {
       serif: "Georgia, 'Times New Roman', serif",
       mono: "ui-monospace, 'Cascadia Mono', Consolas, monospace",
     };
-    const family = families[fontSettings.fontFamily] ?? "";
+    let family = families[fontSettings.fontFamily] ?? "";
+    if (fontSettings.googleFont) {
+      const name = fontSettings.googleFont;
+      const id = "slate-google-font";
+      let link = document.getElementById(id) as HTMLLinkElement | null;
+      const href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(
+        name
+      ).replace(/%20/g, "+")}:wght@400;600;700&display=swap`;
+      if (!link) {
+        link = document.createElement("link");
+        link.id = id;
+        link.rel = "stylesheet";
+        document.head.appendChild(link);
+      }
+      if (link.href !== href) link.href = href;
+      family = `'${name}', ${family || "sans-serif"}`;
+    } else {
+      document.getElementById("slate-google-font")?.remove();
+    }
     if (family) root.style.setProperty("--editor-font", family);
     else root.style.removeProperty("--editor-font");
   }, [fontSettings]);
@@ -166,16 +188,12 @@ export default function App() {
   }, []);
 
   const finishTour = useCallback(async () => {
-    const existing = pages?.find(
-      (p) => p.title === "Getting started with Slate"
-    );
+    const existing = pages?.find((p) => p.title === SHOWCASE_TITLE);
     if (existing) {
       selectPage(existing._id);
       return;
     }
-    const id = await importMarkdownPage(convex, SAMPLE_PAGE_MARKDOWN, {
-      convertTables: true,
-    });
+    const id = await createShowcasePage(convex);
     selectPage(id);
   }, [convex, pages, selectPage]);
 
@@ -295,6 +313,7 @@ export default function App() {
         onOpenImport={() => setImportOpen(true)}
         onOpenTemplates={() => setTemplatesOpen(true)}
         onStartTour={() => startTour({ onFinish: () => void finishTour() })}
+        onOpenShortcuts={() => setShortcutsOpen(true)}
         onCollapse={() => setSidebarOpen(false)}
         simpleMode={fontSettings.simpleMode}
         onMove={setMovePageId}
@@ -304,13 +323,29 @@ export default function App() {
       <div className="main">
         <div className="topbar">
           {!sidebarOpen && (
-            <button
-              className="topbar-btn"
-              title="Show sidebar (Ctrl+\)"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <PanelLeftOpen size={16} />
-            </button>
+            <>
+              <button
+                className="topbar-btn"
+                title="Show sidebar (Ctrl+\)"
+                onClick={() => setSidebarOpen(true)}
+              >
+                <PanelLeftOpen size={16} />
+              </button>
+              <button
+                className="topbar-btn"
+                title="Search (Ctrl+K)"
+                onClick={() => setSearchOpen(true)}
+              >
+                <SearchIcon size={16} />
+              </button>
+              <button
+                className="topbar-btn"
+                title="New page (Ctrl+N)"
+                onClick={() => void newPage()}
+              >
+                <SquarePen size={16} />
+              </button>
+            </>
           )}
           <div className="breadcrumbs">
             {breadcrumbs.map((page, i) => (
@@ -344,6 +379,7 @@ export default function App() {
             className="topbar-btn"
             title="Text & display settings"
             style={{ fontWeight: 600, fontSize: 14.5 }}
+            data-tour="font"
             onClick={fontMenu.open}
           >
             Aa
@@ -351,6 +387,7 @@ export default function App() {
           <button
             className="topbar-btn"
             title="Focus mode (Ctrl+Shift+F)"
+            data-tour="focus"
             onClick={() => setFocusMode((f) => !f)}
           >
             {focusMode ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
@@ -358,6 +395,7 @@ export default function App() {
           <button
             className="topbar-btn"
             title="Toggle theme"
+            data-tour="theme"
             onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
           >
             {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
@@ -366,6 +404,7 @@ export default function App() {
             <button
               className="topbar-btn"
               title="Page options"
+              data-tour="page-options"
               onClick={(e) => {
                 const editor = getCurrentEditor();
                 setWordCount(
@@ -481,6 +520,7 @@ export default function App() {
         />
       )}
       {trashOpen && <TrashModal onClose={() => setTrashOpen(false)} />}
+      {shortcutsOpen && <ShortcutsModal onClose={() => setShortcutsOpen(false)} />}
       {aiOpen && (
         <AiDialog onClose={() => setAiOpen(false)} onSelect={selectPage} />
       )}

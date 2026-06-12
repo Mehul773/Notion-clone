@@ -146,6 +146,29 @@ export function BlockEditor({
     [pageId]
   );
 
+  // Custom blocks (database, drawing) take a ProseMirror NodeSelection that
+  // never clears when clicking outside the editor — drop it to a text
+  // selection so the blue "selected" outline goes away.
+  useEffect(() => {
+    const onMouseDown = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest(".bn-editor")) return;
+      try {
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+        const tiptap = (editor as any)._tiptapEditor;
+        const selection = tiptap?.state?.selection;
+        if (selection && "node" in selection) {
+          tiptap.commands.setTextSelection(selection.from);
+          tiptap.commands.blur();
+        }
+      } catch {
+        // best-effort: never break the editor over a deselect
+      }
+    };
+    document.addEventListener("mousedown", onMouseDown);
+    return () => document.removeEventListener("mousedown", onMouseDown);
+  }, [editor]);
+
   useEffect(() => {
     setCurrentEditor(editor);
     return () => {

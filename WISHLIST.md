@@ -35,8 +35,30 @@ context to start cold. Done items reference where they live in the code.
 | Simple mode toggle (hides AI/Import/advanced blocks) | `SettingsPopover.tsx`, `Sidebar.tsx`, `BlockEditor.tsx` |
 | Text color control | already in BlockNote's formatting toolbar (select text) |
 
+## ✅ Done (third wave)
+
+| Feature | Where |
+|---------|-------|
+| Meme GIFs in tour (random per step + 🎲 reroll, zero API calls) | `MEME_POOLS` in `src/lib/tour.ts` |
+| Extra tour steps: favorites, theme, fonts, focus, page options, cover/icon | `src/lib/tour.ts` |
+| Showcase "Getting started" page w/ colored text, live DB + drawing, markdown shortcuts | `src/lib/showcase.ts` |
+| Shortcuts panel | `ShortcutsModal.tsx` + sidebar button |
+| Focus-mode exit pill now clearly visible | `.focus-exit-btn` in `styles.css` |
+| Collapsed sidebar keeps quick icons (search, new page) in topbar | `App.tsx` topbar |
+| Recent rows = full tree items (⋯ menu, + child) + collapsible section | `Sidebar.tsx` |
+| Google Fonts: paste name or link → editor font | `parseGoogleFont` in `SettingsPopover.tsx`, loader in `App.tsx` |
+| Formula `[` autocomplete (Tab/click to accept) | `FormulaInput` in `DatabaseTable.tsx` |
+| DB: insert column left/right, insert row above/below (Alt+click) | `DatabaseTable.tsx` + `convex/database.ts` `atOrder` |
+| DB: drag-and-drop column reorder | `moveColumn` mutation + header drag handlers |
+| Board/Calendar/Chart column pickers (choose group/date/value column) | `DatabaseViews.tsx` selects |
+| Weekly Task Manager + Habit Tracker templates (replaced Weekly Planner) | `src/lib/templates.ts` |
+| DB/drawing block deselect on outside click | mousedown handler in `BlockEditor.tsx` |
+
 ## 🟡 Later (medium effort)
 
+- [ ] **Horizontal slash menu option** — replace BlockNote's vertical `SuggestionMenuController` list with a custom grouped horizontal component; setting in Aa menu (default vertical). Non-trivial: custom suggestion menu rendering.
+- [ ] **Custom keyboard shortcuts** — settings UI mapping action → key combo, stored in localStorage, applied in the `onKey` handler in `App.tsx`.
+- [ ] **Page links / @-mentions** — inline custom content in BlockNote linking to another page + backlinks panel. Needs custom inline content spec.
 - [ ] **Password-protected pages** — local-first approach: hash a passphrase per page, encrypt `docs.content` client-side (Web Crypto API, built-in & free), prompt on open. Note: protects content at rest, not a real multi-user ACL.
 - [ ] **Side-by-side view** — split `App.tsx` main area into two `PageView` panes with independent `activePageId`s; entry point "Open to the right" in the page ⋯ menu.
 - [ ] **Group pages in sidebar** — user-defined sections: a `sections` table (name, order) + `sectionId` on pages; drag pages between section headers (reuse the existing drag-drop wiring in `PageTree.tsx`).

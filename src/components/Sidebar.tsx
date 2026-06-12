@@ -4,9 +4,11 @@ import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import {
   CalendarDays,
+  ChevronRight,
   FileText,
   FileUp,
   GraduationCap,
+  Keyboard,
   LayoutTemplate,
   ListFilter,
   PanelLeftClose,
@@ -32,6 +34,7 @@ export function Sidebar({
   onOpenImport,
   onOpenTemplates,
   onStartTour,
+  onOpenShortcuts,
   onCollapse,
   simpleMode,
   onMove,
@@ -47,6 +50,7 @@ export function Sidebar({
   onOpenImport: () => void;
   onOpenTemplates: () => void;
   onStartTour: () => void;
+  onOpenShortcuts: () => void;
   onCollapse: () => void;
   simpleMode?: boolean;
   onMove: (id: Id<"pages">) => void;
@@ -67,6 +71,13 @@ export function Sidebar({
   });
   const [dragging, setDragging] = useState(false);
   const [filter, setFilter] = useState("");
+  const [recentOpen, setRecentOpen] = useState(
+    () => localStorage.getItem("slate:recentOpen") !== "0"
+  );
+
+  useEffect(() => {
+    localStorage.setItem("slate:recentOpen", recentOpen ? "1" : "0");
+  }, [recentOpen]);
 
   useEffect(() => {
     localStorage.setItem(EXPANDED_KEY, JSON.stringify(expanded));
@@ -196,35 +207,38 @@ export function Sidebar({
       >
         {recent.length > 0 && (
           <div data-tour="recent">
-            <div className="sidebar-section-label">Recent</div>
-            {recent.map((page) => (
-              <button
-                key={`recent-${page._id}`}
-                className={`tree-item recent-item${
-                  activePageId === page._id ? " active" : ""
-                }`}
-                onClick={() => onSelect(page._id)}
-              >
-                <span className="recent-icon">
-                  {page.icon ?? <FileText size={14} />}
-                </span>
-                <span className="tree-item-title">
-                  {page.title || "Untitled"}
-                </span>
-                {Date.now() - page._creationTime < 10 * 60 * 1000 && (
-                  <span className="new-badge">NEW</span>
-                )}
-              </button>
-            ))}
+            <button
+              className="sidebar-section-label section-toggle"
+              onClick={() => setRecentOpen((open) => !open)}
+              title={recentOpen ? "Collapse Recent" : "Expand Recent"}
+            >
+              Recent
+              <ChevronRight
+                size={12}
+                style={{
+                  transform: recentOpen ? "rotate(90deg)" : undefined,
+                  transition: "transform 120ms",
+                }}
+              />
+            </button>
+            {recentOpen &&
+              recent.map((page) => (
+                <PageTreeItem
+                  key={`recent-${page._id}`}
+                  page={page}
+                  depth={0}
+                  {...treeProps}
+                />
+              ))}
           </div>
         )}
         {favorites.length > 0 && (
-          <>
+          <div data-tour="favorites">
             <div className="sidebar-section-label">Favorites</div>
             {favorites.map((page) => (
               <PageTreeItem key={`fav-${page._id}`} page={page} depth={0} {...treeProps} />
             ))}
-          </>
+          </div>
         )}
         <div className="sidebar-section-label" style={{ display: "flex", alignItems: "center" }}>
           Pages
@@ -275,6 +289,9 @@ export function Sidebar({
         </button>
         <button className="sidebar-item" onClick={onStartTour}>
           <GraduationCap size={15} /> Tutorial
+        </button>
+        <button className="sidebar-item" onClick={onOpenShortcuts}>
+          <Keyboard size={15} /> Shortcuts
         </button>
       </div>
       <div
