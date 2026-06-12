@@ -33,6 +33,7 @@ export function Sidebar({
   onOpenTemplates,
   onStartTour,
   onCollapse,
+  simpleMode,
   onMove,
   width,
   setWidth,
@@ -47,6 +48,7 @@ export function Sidebar({
   onOpenTemplates: () => void;
   onStartTour: () => void;
   onCollapse: () => void;
+  simpleMode?: boolean;
   onMove: (id: Id<"pages">) => void;
   width: number;
   setWidth: (w: number) => void;
@@ -154,12 +156,16 @@ export function Sidebar({
         <button className="sidebar-item" data-tour="templates" onClick={onOpenTemplates}>
           <LayoutTemplate size={15} /> Templates
         </button>
-        <button className="sidebar-item" data-tour="ai" onClick={onOpenAi}>
-          <Sparkles size={15} /> AI workspace
-        </button>
-        <button className="sidebar-item" data-tour="import" onClick={onOpenImport}>
-          <FileUp size={15} /> Import Markdown
-        </button>
+        {!simpleMode && (
+          <>
+            <button className="sidebar-item" data-tour="ai" onClick={onOpenAi}>
+              <Sparkles size={15} /> AI workspace
+            </button>
+            <button className="sidebar-item" data-tour="import" onClick={onOpenImport}>
+              <FileUp size={15} /> Import Markdown
+            </button>
+          </>
+        )}
       </div>
       <div
         className={`sidebar-scroll${rootDropActive ? " root-drop" : ""}`}

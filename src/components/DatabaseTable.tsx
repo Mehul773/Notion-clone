@@ -4,13 +4,20 @@ import { api } from "../../convex/_generated/api";
 import { Id, Doc } from "../../convex/_generated/dataModel";
 import {
   AlignLeft,
+  BarChart3,
   Calendar,
+  CalendarDays,
   CheckSquare,
   ChevronDown,
+  Eye,
+  EyeOff,
   Hash,
+  Kanban,
   Link as LinkIcon,
   MoreHorizontal,
   Plus,
+  Sigma,
+  Table2,
   Tag,
   Trash2,
   ExternalLink,
@@ -18,6 +25,8 @@ import {
 } from "lucide-react";
 import { Popover, useAnchor } from "./Popover";
 import { debounce, tagColor, TAG_PALETTE } from "../lib/utils";
+import { evaluateFormula } from "../lib/formula";
+import { BoardView, CalendarView, ChartView } from "./DatabaseViews";
 
 type ColumnType = Doc<"dbColumns">["type"];
 
@@ -28,7 +37,15 @@ const TYPE_META: { type: ColumnType; label: string; icon: typeof Hash }[] = [
   { type: "date", label: "Date", icon: Calendar },
   { type: "checkbox", label: "Checkbox", icon: CheckSquare },
   { type: "url", label: "URL", icon: LinkIcon },
+  { type: "formula", label: "Formula", icon: Sigma },
 ];
+
+const VIEW_META = [
+  { view: "table", label: "Table", icon: Table2 },
+  { view: "board", label: "Board", icon: Kanban },
+  { view: "calendar", label: "Calendar", icon: CalendarDays },
+  { view: "chart", label: "Chart", icon: BarChart3 },
+] as const;
 
 function typeIcon(type: ColumnType) {
   const Icon = TYPE_META.find((t) => t.type === type)?.icon ?? AlignLeft;
@@ -356,6 +373,25 @@ function ColumnHeader({
               }
             }}
           />
+          {column.type === "formula" && (
+            <>
+              <div className="menu-label">Formula</div>
+              <input
+                className="col-name-input"
+                placeholder="[Price] * (1 - [Discount])"
+                defaultValue={column.formula ?? ""}
+                onBlur={(e) =>
+                  void updateColumn({
+                    columnId: column._id,
+                    formula: e.target.value,
+                  })
+                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                }}
+              />
+            </>
+          )}
           <div className="menu-label">Type</div>
           {TYPE_META.map(({ type, label, icon: Icon }) => (
             <button
@@ -376,6 +412,16 @@ function ColumnHeader({
               )}
             </button>
           ))}
+          <div className="menu-sep" />
+          <button
+            className="menu-item"
+            onClick={() => {
+              void updateColumn({ columnId: column._id, hidden: true });
+              close();
+            }}
+          >
+            <EyeOff size={14} /> Hide column
+          </button>
           {onDeleteAllowed && (
             <>
               <div className="menu-sep" />
@@ -403,6 +449,7 @@ export function DatabaseTable({ tableId }: { tableId: string }) {
     tableId ? { tableId: tableId as Id<"dbTables"> } : "skip"
   );
   const renameTable = useMutation(api.database.renameTable);
+  const setView = useMutation(api.database.setView);
   const addColumn = useMutation(api.database.addColumn);
   const addRow = useMutation(api.database.addRow);
   const updateCell = useMutation(api.database.updateCell);
@@ -410,6 +457,7 @@ export function DatabaseTable({ tableId }: { tableId: string }) {
   const deleteRow = useMutation(api.database.deleteRow);
 
   const [title, setTitle] = useState<string | null>(null);
+  const hiddenMenu = useAnchor();
 
   if (data === undefined) {
     return (
@@ -428,7 +476,10 @@ export function DatabaseTable({ tableId }: { tableId: string }) {
 
   const { table, columns, rows } = data;
   const sortedColumns = [...columns].sort((a, b) => a.order - b.order);
+  const visibleColumns = sortedColumns.filter((c) => !c.hidden);
+  const hiddenColumns = sortedColumns.filter((c) => c.hidden);
   const sortedRows = [...rows].sort((a, b) => a.order - b.order);
+  const view = table.view ?? "table";
 
   const commitTitle = () => {
     if (title !== null && title !== table.name) {
@@ -450,15 +501,63 @@ export function DatabaseTable({ tableId }: { tableId: string }) {
             if (e.key === "Enter") (e.target as HTMLInputElement).blur();
           }}
         />
+        <div className="db-view-switcher">
+          {hiddenColumns.length > 0 && (
+            <button
+              className="db-view-btn"
+              title={`${hiddenColumns.length} hidden column(s)`}
+              onClick={hiddenMenu.open}
+            >
+              <EyeOff size={13} />
+            </button>
+          )}
+          {VIEW_META.map(({ view: id, label, icon: Icon }) => (
+            <button
+              key={id}
+              className={`db-view-btn${view === id ? " active" : ""}`}
+              title={label}
+              onClick={() => void setView({ tableId: table._id, view: id })}
+            >
+              <Icon size={13} />
+            </button>
+          ))}
+        </div>
+        {hiddenMenu.anchor && (
+          <Popover anchor={hiddenMenu.anchor} onClose={hiddenMenu.close} className="menu">
+            <div className="menu-label">Hidden columns</div>
+            {hiddenColumns.map((col) => (
+              <button
+                key={col._id}
+                className="menu-item"
+                onClick={() =>
+                  void updateColumn({ columnId: col._id, hidden: false })
+                }
+              >
+                <Eye size={13} /> {col.name}
+              </button>
+            ))}
+          </Popover>
+        )}
       </div>
+      {view === "board" && (
+        <BoardView columns={visibleColumns} rows={sortedRows} tableId={table._id} />
+      )}
+      {view === "calendar" && (
+        <CalendarView columns={visibleColumns} rows={sortedRows} />
+      )}
+      {view === "chart" && (
+        <ChartView columns={visibleColumns} rows={sortedRows} />
+      )}
+      {view === "table" && (
       <div className="db-scroll">
         <div className="db-table">
           <div className="db-header-row">
-            {sortedColumns.map((col) => (
+            <div className="db-row-gutter header">#</div>
+            {visibleColumns.map((col) => (
               <ColumnHeader
                 key={col._id}
                 column={col}
-                onDeleteAllowed={sortedColumns.length > 1}
+                onDeleteAllowed={visibleColumns.length > 1}
               />
             ))}
             <button
@@ -469,9 +568,10 @@ export function DatabaseTable({ tableId }: { tableId: string }) {
               <Plus size={15} />
             </button>
           </div>
-          {sortedRows.map((row) => (
+          {sortedRows.map((row, rowIndex) => (
             <div className="db-row" key={row._id}>
               <div className="db-row-gutter">
+                <span className="db-row-num">{rowIndex + 1}</span>
                 <button
                   className="db-row-delete"
                   title="Delete row"
@@ -480,10 +580,16 @@ export function DatabaseTable({ tableId }: { tableId: string }) {
                   <Trash2 size={13} />
                 </button>
               </div>
-              {sortedColumns.map((col) => {
+              {visibleColumns.map((col) => {
                 const raw = row.cells[col._id];
                 const width = col.width ?? 180;
                 switch (col.type) {
+                  case "formula":
+                    return (
+                      <div className="db-cell num formula" key={col._id} style={{ width }}>
+                        {evaluateFormula(col.formula ?? "", row, sortedColumns)}
+                      </div>
+                    );
                   case "checkbox":
                     return (
                       <div className="db-cell center" key={col._id} style={{ width }}>
@@ -580,6 +686,7 @@ export function DatabaseTable({ tableId }: { tableId: string }) {
           </button>
         </div>
       </div>
+      )}
       <div className="db-footer">
         {sortedRows.length} {sortedRows.length === 1 ? "row" : "rows"}
       </div>

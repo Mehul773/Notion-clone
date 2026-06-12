@@ -31,6 +31,14 @@ export default defineSchema({
 
   dbTables: defineTable({
     name: v.string(),
+    view: v.optional(
+      v.union(
+        v.literal("table"),
+        v.literal("board"),
+        v.literal("calendar"),
+        v.literal("chart")
+      )
+    ),
   }),
 
   dbColumns: defineTable({
@@ -42,10 +50,13 @@ export default defineSchema({
       v.literal("select"),
       v.literal("date"),
       v.literal("checkbox"),
-      v.literal("url")
+      v.literal("url"),
+      v.literal("formula")
     ),
     options: v.optional(v.array(v.string())),
     optionColors: v.optional(v.record(v.string(), v.string())),
+    formula: v.optional(v.string()),
+    hidden: v.optional(v.boolean()),
     width: v.optional(v.number()),
     order: v.number(),
   }).index("by_table", ["tableId", "order"]),

@@ -1922,6 +1922,277 @@ kbd {
   background: var(--bg-hover);
 }
 
+/* ===== Database views ===== */
+.db-view-switcher {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.db-view-btn {
+  display: flex;
+  align-items: center;
+  padding: 4px 7px;
+  border-radius: 5px;
+  color: var(--text-tertiary);
+  background: transparent;
+}
+.db-view-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+.db-view-btn.active {
+  background: var(--bg-hover);
+  color: var(--accent);
+}
+.db-view-note {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  padding: 16px 10px;
+  text-align: center;
+}
+.db-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Board (widget-style cards) */
+.db-board {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 6px 2px 10px;
+  align-items: flex-start;
+}
+.db-lane {
+  flex: 0 0 200px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.db-lane.drag-over {
+  border-color: var(--accent);
+}
+.db-lane-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 2px;
+}
+.db-lane-none {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+}
+.db-lane-count {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+.db-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 9px;
+  cursor: grab;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+.db-card:active {
+  cursor: grabbing;
+}
+.db-card-title {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text);
+}
+.db-card-meta {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+.db-card-date,
+.db-card-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10.5px;
+  color: var(--text-tertiary);
+}
+.db-card-done {
+  color: #3a7a55;
+}
+.db-lane-add {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+.db-lane-add:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+/* Calendar */
+.db-cal-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 2px;
+}
+.db-cal-month {
+  font-size: 13px;
+  font-weight: 600;
+  flex: 1;
+}
+.db-cal-toolbar button {
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  display: flex;
+  align-items: center;
+}
+.db-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.db-cal-dow {
+  background: var(--bg-input);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-align: center;
+  padding: 4px 0;
+}
+.db-cal-day {
+  background: var(--bg);
+  min-height: 64px;
+  padding: 3px 4px;
+  font-size: 11px;
+}
+.db-cal-day.empty {
+  background: var(--bg-input);
+}
+.db-cal-day.today .db-cal-num {
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  padding: 1px 5px;
+}
+.db-cal-num {
+  font-size: 10.5px;
+  color: var(--text-tertiary);
+}
+.db-cal-chip {
+  background: var(--bg-hover);
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-top: 2px;
+  font-size: 10.5px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.db-cal-more {
+  font-size: 9.5px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+/* Chart */
+.db-chart {
+  padding: 10px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.db-chart-caption {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  margin-bottom: 2px;
+}
+.db-chart-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.db-chart-label {
+  width: 110px;
+  flex-shrink: 0;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+}
+.db-chart-track {
+  flex: 1;
+  height: 16px;
+  background: var(--bg-input);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.db-chart-bar {
+  height: 100%;
+  border-radius: 4px;
+  opacity: 0.85;
+  transition: width 240ms ease;
+}
+.db-chart-value {
+  width: 44px;
+  font-size: 11.5px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Row numbers + formula cells */
+.db-row-gutter.header {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.db-row-num {
+  font-size: 10.5px;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+.db-row:hover .db-row-num {
+  display: none;
+}
+.db-row .db-row-delete {
+  display: none;
+}
+.db-row:hover .db-row-delete {
+  display: flex;
+}
+.db-cell.formula {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ===== Misc ===== */
 .spinner {
   width: 22px;

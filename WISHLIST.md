@@ -17,23 +17,26 @@ context to start cold. Done items reference where they live in the code.
 | Doodling & sketch notes | Same Excalidraw block |
 | Create your own templates | Works today via Import Markdown: write any `.md`, keep it as a file, re-import any time. A "Save page as template" button is the follow-up below |
 
-## 🟢 Next up (easy, start here)
+## ✅ Done (second wave)
 
-- [ ] **Save page as template** — add "Save as template" to the page ⋯ menu: export page to Markdown (`blocksToMarkdownLossy`, see `exportPage` in `src/App.tsx`), store in a new `templates` Convex table, list user templates in `TemplatesDialog.tsx` under the built-ins.
-- [ ] **Sidebar page filter** — small filter input above the Pages section in `Sidebar.tsx`; on text, flatten tree and show matching titles only (the `pages` array is already in memory).
-- [ ] **GIF / any-image covers** — `CoverPicker.tsx` already supports image upload; add a URL input field (paste any GIF URL) + a small gallery of free GIFs via the Tenor or GIPHY public API (free tier, needs a free API key — confirm before adding).
-- [ ] **Font styles** — extend `SettingsPopover.tsx` font settings with a font-family picker (Default / Serif / Mono, like Notion); set a CSS variable on the root, same pattern as `--editor-fs`.
-- [ ] **Text size & color control** — BlockNote's formatting toolbar already has color support; verify it's enabled in `BlockNoteView` and add custom font-size options to the toolbar.
+| Feature | Where |
+|---------|-------|
+| Save page as template + "Your templates" section w/ delete | page ⋯ menu in `App.tsx`, `convex/templates.ts`, `TemplatesDialog.tsx` |
+| Sidebar page filter | filter input in `Sidebar.tsx` Pages header |
+| GIF covers (GIPHY trending/search) + paste-any-URL | `src/lib/giphy.ts`, `CoverPicker.tsx` tabs |
+| Font family picker (Default/Serif/Mono) | `SettingsPopover.tsx` → `--editor-font` var |
+| Sidebar collapse/expand (Ctrl+\\) | `Sidebar.tsx` + topbar reopen button |
+| Kanban board view (widget-style cards, drag between lanes) | `DatabaseViews.tsx` BoardView |
+| Calendar month view for databases | `DatabaseViews.tsx` CalendarView |
+| Bar charts from databases (counts or sums by select) | `DatabaseViews.tsx` ChartView |
+| Formula columns — `[Score] * 2` style, expr-eval (MIT) | `src/lib/formula.ts`, column popover |
+| Auto row numbers (#) in table view | `DatabaseTable.tsx` gutter |
+| Hide/unhide database columns | column popover + eye menu in title row |
+| Simple mode toggle (hides AI/Import/advanced blocks) | `SettingsPopover.tsx`, `Sidebar.tsx`, `BlockEditor.tsx` |
+| Text color control | already in BlockNote's formatting toolbar (select text) |
 
 ## 🟡 Later (medium effort)
 
-- [ ] **Kanban board view for databases** — add a `view: "table" | "board"` prop on the database block; board groups rows by a select column, drag between columns patches the cell. All data already lives in `dbRows.cells`.
-- [ ] **Calendar view** — month grid rendering `dbRows` with a date column; library option: FullCalendar (MIT, free).
-- [ ] **Charts from databases** — render number columns as bar/line charts; library: Chart.js or Recharts (both MIT, free).
-- [ ] **Simple mode toggle** — a setting that hides advanced slash items (database, embed, PDF, drawing) and sidebar extras (AI, Import), leaving a clean notes app. Mostly conditional rendering driven by one boolean in `SettingsPopover`.
-- [ ] **Spreadsheet-style formulas in databases** — add a `formula` column type evaluated client-side (e.g. `price * (1 - discount)` referencing sibling columns); library: expr-eval (MIT) instead of writing a parser.
-- [ ] **Dynamic incremental row numbers** — render an auto `#` column in `DatabaseTable.tsx` based on row order (display-only, no schema change).
-- [ ] **Lock / hide database columns** — `hidden: boolean` on `dbColumns`, eye toggle in the column popover, filtered out of render.
 - [ ] **Password-protected pages** — local-first approach: hash a passphrase per page, encrypt `docs.content` client-side (Web Crypto API, built-in & free), prompt on open. Note: protects content at rest, not a real multi-user ACL.
 - [ ] **Side-by-side view** — split `App.tsx` main area into two `PageView` panes with independent `activePageId`s; entry point "Open to the right" in the page ⋯ menu.
 - [ ] **Group pages in sidebar** — user-defined sections: a `sections` table (name, order) + `sectionId` on pages; drag pages between section headers (reuse the existing drag-drop wiring in `PageTree.tsx`).

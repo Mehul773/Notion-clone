@@ -296,6 +296,7 @@ export default function App() {
         onOpenTemplates={() => setTemplatesOpen(true)}
         onStartTour={() => startTour({ onFinish: () => void finishTour() })}
         onCollapse={() => setSidebarOpen(false)}
+        simpleMode={fontSettings.simpleMode}
         onMove={setMovePageId}
         width={sidebarWidth}
         setWidth={setSidebarWidth}

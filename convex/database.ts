@@ -8,7 +8,8 @@ const columnType = v.union(
   v.literal("select"),
   v.literal("date"),
   v.literal("checkbox"),
-  v.literal("url")
+  v.literal("url"),
+  v.literal("formula")
 );
 
 export const getTable = query({
@@ -62,6 +63,21 @@ export const renameTable = mutation({
   },
 });
 
+export const setView = mutation({
+  args: {
+    tableId: v.id("dbTables"),
+    view: v.union(
+      v.literal("table"),
+      v.literal("board"),
+      v.literal("calendar"),
+      v.literal("chart")
+    ),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.tableId, { view: args.view });
+  },
+});
+
 export const addColumn = mutation({
   args: { tableId: v.id("dbTables") },
   handler: async (ctx, args) => {
@@ -87,6 +103,8 @@ export const updateColumn = mutation({
     type: v.optional(columnType),
     options: v.optional(v.array(v.string())),
     optionColors: v.optional(v.record(v.string(), v.string())),
+    formula: v.optional(v.string()),
+    hidden: v.optional(v.boolean()),
     width: v.optional(v.number()),
   },
   handler: async (ctx, args) => {

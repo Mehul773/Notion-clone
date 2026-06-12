@@ -48,6 +48,7 @@
     "@excalidraw/excalidraw": "^0.18.1",
     "convex": "^1.41.0",
     "driver.js": "^1.4.0",
+    "expr-eval": "^2.0.2",
     "lucide-react": "^1.17.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"

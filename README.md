@@ -19,7 +19,9 @@ What this project demonstrates: a custom block-editor integration (BlockNote ext
 ## Features
 
 - **Block editor** — headings, lists, to-dos, toggles, quotes, code blocks, tables, images (uploaded to Convex file storage), video/audio/file embeds. Type `/` for the command menu, drag blocks with the side handle.
-- **Databases** — Notion-style tables embedded in any page via `/database`, with typed columns (text, number, select, date, checkbox, URL), colored tag chips (pick from 10 colors per option, or delete options), column resize/rename/retype, and live row counts.
+- **Databases** — Notion-style tables embedded in any page via `/database`, with typed columns (text, number, select, date, checkbox, URL, **formula**), colored tag chips, column resize/rename/retype/hide, auto row numbers, and live row counts.
+- **Database views** — switch any database between **Table**, **Kanban board** (widget-style cards, drag between lanes), **Calendar** (month grid from a date column), and **Chart** (bar chart of counts or sums by tag).
+- **Formula columns** — spreadsheet-style math right in a database: `[Price] * (1 - [Discount])` references sibling columns by name (powered by expr-eval).
 - **Import from Markdown** — paste Markdown or drop a `.md` file and a fully formatted page is created automatically. Frontmatter sets the title and icon, the first `# H1` becomes the title otherwise, and pipe tables are converted into real databases with **inferred column types** (numbers, dates, checkboxes, URLs, and repeating values become select tags). Includes a one-click **"Copy AI prompt"** so any AI assistant can write a perfectly-formatted file for you.
 - **Full-text content search** — `Ctrl+K` searches inside page bodies (including database-free text in nested blocks and tables), not just titles, and shows a matching snippet under each result. No more "I know I wrote it somewhere".
 - **Templates gallery** — six ready-made pages (Meeting Notes, Project Tracker, Hiring Pipeline, Weekly Planner, 30-60-90 Onboarding, Content Calendar) that instantiate with real, typed databases in one click.
@@ -27,7 +29,10 @@ What this project demonstrates: a custom block-editor integration (BlockNote ext
 - **Focus mode** — `Ctrl+Shift+F` hides the sidebar and topbar for distraction-free writing; a subtle pill in the corner (or the same shortcut) brings everything back.
 - **Onboarding tour** — a guided next/prev/skip walkthrough (driver.js) starts on first launch and is replayable from the **Tutorial** button; finishing it creates a live "Getting started" sample page with a real database to play with.
 - **Recent pages + NEW tags** — your five latest-edited pages sit at the top of the sidebar, and freshly created pages wear a NEW badge for ten minutes.
-- **Covers by default** — every new page gets a random gradient cover (change or remove it any time), so nothing starts looking empty.
+- **Covers by default** — every new page gets a random gradient cover; the cover picker also has a **GIF tab** (GIPHY trending + search) and accepts any pasted image URL.
+- **Simple mode** — one toggle in the Aa menu hides AI features and advanced blocks, leaving a clean, focused notes app.
+- **Your own templates** — "Save as template" in any page's ⋯ menu; reuse it from the Templates dialog.
+- **Sidebar control** — collapse/expand with `Ctrl+\`, filter pages inline, font family picker (Default/Serif/Mono).
 - **AI workspace generator** — "AI workspace" in the sidebar: paste your Anthropic API key, describe a project, and Claude (Opus 4.8) plans and creates a full starter workspace — pages, sub-pages, content, and seeded databases.
 - **Drawings** — `/drawing` embeds a full Excalidraw whiteboard, autosaved to Convex.
 - **Embeds** — `/youtube` embeds YouTube, Vimeo, or any web page; `/pdf` uploads a PDF with inline preview and download.

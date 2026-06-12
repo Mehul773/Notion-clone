@@ -168,6 +168,20 @@ export function BlockEditor({
         <SuggestionMenuController
           triggerCharacter="/"
           getItems={async (query) => {
+            let simpleMode = false;
+            try {
+              simpleMode =
+                JSON.parse(localStorage.getItem("slate:fontSettings") ?? "{}")
+                  .simpleMode === true;
+            } catch {
+              simpleMode = false;
+            }
+            if (simpleMode) {
+              return filterSuggestionItems(
+                getDefaultReactSlashMenuItems(editor),
+                query
+              );
+            }
             const customItems: DefaultReactSuggestionItem[] = [
               {
                 title: "Database",

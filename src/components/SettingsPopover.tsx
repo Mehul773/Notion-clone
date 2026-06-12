@@ -5,12 +5,14 @@ export type FontSettings = {
   editorSize: number;
   codeSize: number;
   fontFamily: "default" | "serif" | "mono";
+  simpleMode: boolean;
 };
 
 export const DEFAULT_FONT_SETTINGS: FontSettings = {
   editorSize: 15.5,
   codeSize: 13.5,
   fontFamily: "default",
+  simpleMode: false,
 };
 
 function Stepper({
@@ -123,6 +125,20 @@ export function SettingsPopover({
           </div>
         </>
       )}
+      <div className="menu-sep" />
+      <div className="settings-row">
+        <span className="settings-label">Simple mode</span>
+        <label className="md-toggle" title="Hide advanced blocks and AI features for a clean notes app">
+          <input
+            type="checkbox"
+            checked={settings.simpleMode}
+            onChange={(e) =>
+              setSettings({ ...settings, simpleMode: e.target.checked })
+            }
+          />
+          {settings.simpleMode ? "On" : "Off"}
+        </label>
+      </div>
       <div className="menu-sep" />
       <button
         className="menu-item"
