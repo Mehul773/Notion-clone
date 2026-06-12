@@ -1,9 +1,19 @@
 import { useEffect, useState } from "react";
-import { useMutation } from "convex/react";
+import { useConvex, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
-import { FileUp, Plus, Search, Sparkles, SquarePen, Trash2 } from "lucide-react";
+import {
+  CalendarDays,
+  FileUp,
+  LayoutTemplate,
+  Plus,
+  Search,
+  Sparkles,
+  SquarePen,
+  Trash2,
+} from "lucide-react";
 import { buildChildrenMap, Page, PageTreeItem } from "./PageTree";
+import { openDailyNote } from "../lib/dailyNote";
 
 const EXPANDED_KEY = "slate:expanded";
 
@@ -15,6 +25,7 @@ export function Sidebar({
   onOpenTrash,
   onOpenAi,
   onOpenImport,
+  onOpenTemplates,
   onMove,
   width,
   setWidth,
@@ -26,12 +37,15 @@ export function Sidebar({
   onOpenTrash: () => void;
   onOpenAi: () => void;
   onOpenImport: () => void;
+  onOpenTemplates: () => void;
   onMove: (id: Id<"pages">) => void;
   width: number;
   setWidth: (w: number) => void;
 }) {
+  const convex = useConvex();
   const create = useMutation(api.pages.create);
   const moveRelative = useMutation(api.pages.moveRelative);
+  const [openingToday, setOpeningToday] = useState(false);
   const [rootDropActive, setRootDropActive] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>(() => {
     try {
@@ -100,6 +114,24 @@ export function Sidebar({
         <button className="sidebar-item" onClick={newPage}>
           <SquarePen size={15} /> New page
           <span className="kbd-hint">Ctrl N</span>
+        </button>
+        <button
+          className="sidebar-item"
+          disabled={openingToday}
+          onClick={async () => {
+            if (openingToday) return;
+            setOpeningToday(true);
+            try {
+              onSelect(await openDailyNote(convex, pages));
+            } finally {
+              setOpeningToday(false);
+            }
+          }}
+        >
+          <CalendarDays size={15} /> Today's note
+        </button>
+        <button className="sidebar-item" onClick={onOpenTemplates}>
+          <LayoutTemplate size={15} /> Templates
         </button>
         <button className="sidebar-item" onClick={onOpenAi}>
           <Sparkles size={15} /> AI workspace

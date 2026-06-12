@@ -21,6 +21,10 @@ What this project demonstrates: a custom block-editor integration (BlockNote ext
 - **Block editor** — headings, lists, to-dos, toggles, quotes, code blocks, tables, images (uploaded to Convex file storage), video/audio/file embeds. Type `/` for the command menu, drag blocks with the side handle.
 - **Databases** — Notion-style tables embedded in any page via `/database`, with typed columns (text, number, select, date, checkbox, URL), colored tag chips (pick from 10 colors per option, or delete options), column resize/rename/retype, and live row counts.
 - **Import from Markdown** — paste Markdown or drop a `.md` file and a fully formatted page is created automatically. Frontmatter sets the title and icon, the first `# H1` becomes the title otherwise, and pipe tables are converted into real databases with **inferred column types** (numbers, dates, checkboxes, URLs, and repeating values become select tags). Includes a one-click **"Copy AI prompt"** so any AI assistant can write a perfectly-formatted file for you.
+- **Full-text content search** — `Ctrl+K` searches inside page bodies (including database-free text in nested blocks and tables), not just titles, and shows a matching snippet under each result. No more "I know I wrote it somewhere".
+- **Templates gallery** — six ready-made pages (Meeting Notes, Project Tracker, Hiring Pipeline, Weekly Planner, 30-60-90 Onboarding, Content Calendar) that instantiate with real, typed databases in one click.
+- **Daily notes** — "Today's note" in the sidebar opens today's journal page (auto-created under a 📓 Journal section, one per day) with a starter checklist — the Logseq/Obsidian habit, one click away.
+- **Focus mode** — `Ctrl+Shift+F` hides the sidebar and topbar for distraction-free writing; a subtle pill in the corner (or the same shortcut) brings everything back.
 - **AI workspace generator** — "AI workspace" in the sidebar: paste your Anthropic API key, describe a project, and Claude (Opus 4.8) plans and creates a full starter workspace — pages, sub-pages, content, and seeded databases.
 - **Drawings** — `/drawing` embeds a full Excalidraw whiteboard, autosaved to Convex.
 - **Embeds** — `/youtube` embeds YouTube, Vimeo, or any web page; `/pdf` uploads a PDF with inline preview and download.
@@ -85,8 +89,9 @@ With **"Convert tables to databases"** on (default), each table becomes a real S
 
 | Shortcut | Action |
 | --- | --- |
-| `Ctrl+K` / `Ctrl+P` | Quick switcher |
+| `Ctrl+K` / `Ctrl+P` | Quick switcher (titles + full page content) |
 | `Ctrl+N` | New page |
+| `Ctrl+Shift+F` | Focus mode |
 | `/` in the editor | Block command menu |
 | `Enter` on the title | Jump into the document |
 

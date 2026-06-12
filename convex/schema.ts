@@ -23,8 +23,11 @@ export default defineSchema({
   docs: defineTable({
     pageId: v.id("pages"),
     content: v.string(),
+    searchText: v.optional(v.string()),
     updatedAt: v.number(),
-  }).index("by_page", ["pageId"]),
+  })
+    .index("by_page", ["pageId"])
+    .searchIndex("search_content", { searchField: "searchText" }),
 
   dbTables: defineTable({
     name: v.string(),

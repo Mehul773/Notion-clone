@@ -1,6 +1,7 @@
 import { BlockNoteEditor } from "@blocknote/core";
 import { ConvexReactClient } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { Id } from "../../convex/_generated/dataModel";
 import { schema } from "../components/BlockEditor";
 
 /* Markdown import: paste or upload a .md file and turn it into a full page.
@@ -156,7 +157,7 @@ export async function convertTablesToDatabases(
 export async function importMarkdownPage(
   convex: ConvexReactClient,
   markdown: string,
-  options: { convertTables: boolean }
+  options: { convertTables: boolean; parentId?: Id<"pages"> }
 ) {
   const { title: fmTitle, icon, body } = parseFrontmatter(markdown);
   let blocks = await markdownToBlocks(body);
@@ -174,6 +175,7 @@ export async function importMarkdownPage(
   }
   const pageId = await convex.mutation(api.pages.create, {
     title: title ?? "Imported page",
+    parentId: options.parentId,
   });
   if (icon) {
     await convex.mutation(api.pages.setIcon, { pageId, icon });

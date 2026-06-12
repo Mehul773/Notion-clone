@@ -1594,6 +1594,75 @@ kbd {
   accent-color: var(--accent);
 }
 
+/* ===== Templates dialog ===== */
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 4px;
+}
+.template-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--bg-input);
+  text-align: left;
+  cursor: pointer;
+}
+.template-card:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+.template-card:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.template-icon {
+  font-size: 22px;
+}
+.template-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+.template-desc {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* ===== Focus mode ===== */
+.app.focus-mode .sidebar {
+  display: none;
+}
+.app.focus-mode .topbar {
+  display: none;
+}
+.focus-exit-btn {
+  position: fixed;
+  top: 14px;
+  right: 16px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary, var(--bg-input));
+  color: var(--text-secondary);
+  font-size: 12px;
+  opacity: 0.35;
+  transition: opacity 140ms;
+}
+.focus-exit-btn:hover {
+  opacity: 1;
+  color: var(--text);
+}
+
 /* ===== Misc ===== */
 .spinner {
   width: 22px;

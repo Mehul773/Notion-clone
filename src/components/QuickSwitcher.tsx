@@ -84,7 +84,10 @@ export function QuickSwitcher({
                 {page.icon ?? <FileText size={15} />}
               </span>
               <span className="row-title">{page.title || "Untitled"}</span>
-              <span className="row-path">{pagePath(page as Page, byId)}</span>
+              <span className="row-path">
+                {(page as Page & { snippet?: string }).snippet ??
+                  pagePath(page as Page, byId)}
+              </span>
             </button>
           ))
         )}
