@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
-import { Plus, Search, Sparkles, SquarePen, Trash2 } from "lucide-react";
+import { FileUp, Plus, Search, Sparkles, SquarePen, Trash2 } from "lucide-react";
 import { buildChildrenMap, Page, PageTreeItem } from "./PageTree";
 
 const EXPANDED_KEY = "slate:expanded";
@@ -14,6 +14,7 @@ export function Sidebar({
   onOpenSearch,
   onOpenTrash,
   onOpenAi,
+  onOpenImport,
   onMove,
   width,
   setWidth,
@@ -24,6 +25,7 @@ export function Sidebar({
   onOpenSearch: () => void;
   onOpenTrash: () => void;
   onOpenAi: () => void;
+  onOpenImport: () => void;
   onMove: (id: Id<"pages">) => void;
   width: number;
   setWidth: (w: number) => void;
@@ -101,6 +103,9 @@ export function Sidebar({
         </button>
         <button className="sidebar-item" onClick={onOpenAi}>
           <Sparkles size={15} /> AI workspace
+        </button>
+        <button className="sidebar-item" onClick={onOpenImport}>
+          <FileUp size={15} /> Import Markdown
         </button>
       </div>
       <div

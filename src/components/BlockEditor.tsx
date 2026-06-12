@@ -85,7 +85,7 @@ const DrawingBlock = createReactBlockSpec(
   }
 );
 
-const schema = BlockNoteSchema.create({
+export const schema = BlockNoteSchema.create({
   blockSpecs: {
     ...defaultBlockSpecs,
     database: DatabaseBlock(),

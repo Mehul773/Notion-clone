@@ -21,6 +21,7 @@ import { QuickSwitcher } from "./components/QuickSwitcher";
 import { TrashModal } from "./components/TrashModal";
 import { MoveDialog } from "./components/MoveDialog";
 import { AiDialog } from "./components/AiDialog";
+import { ImportMarkdownDialog } from "./components/ImportMarkdownDialog";
 import {
   DEFAULT_FONT_SETTINGS,
   FontSettings,
@@ -98,6 +99,7 @@ export default function App() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [trashOpen, setTrashOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [movePageId, setMovePageId] = useState<Id<"pages"> | null>(null);
   const [wordCount, setWordCount] = useState<number | null>(null);
   const fontMenu = useAnchor();
@@ -216,6 +218,7 @@ export default function App() {
         onOpenSearch={() => setSearchOpen(true)}
         onOpenTrash={() => setTrashOpen(true)}
         onOpenAi={() => setAiOpen(true)}
+        onOpenImport={() => setImportOpen(true)}
         onMove={setMovePageId}
         width={sidebarWidth}
         setWidth={setSidebarWidth}
@@ -360,6 +363,12 @@ export default function App() {
       {trashOpen && <TrashModal onClose={() => setTrashOpen(false)} />}
       {aiOpen && (
         <AiDialog onClose={() => setAiOpen(false)} onSelect={selectPage} />
+      )}
+      {importOpen && (
+        <ImportMarkdownDialog
+          onClose={() => setImportOpen(false)}
+          onSelect={selectPage}
+        />
       )}
       {movePageId && (
         <MoveDialog

@@ -1530,6 +1530,70 @@ kbd {
   font-size: 13px;
 }
 
+/* ===== Markdown import dialog ===== */
+.md-copy-prompt {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text);
+  font-size: 11.5px;
+  font-weight: 500;
+  vertical-align: middle;
+}
+.md-copy-prompt:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.md-drop.drag-over {
+  border-color: var(--accent);
+  border-style: dashed;
+}
+.ai-textarea.md-drop {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.md-import-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.md-file-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.md-file-btn:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+.md-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  margin-left: auto;
+}
+.md-toggle input {
+  accent-color: var(--accent);
+}
+
 /* ===== Misc ===== */
 .spinner {
   width: 22px;
