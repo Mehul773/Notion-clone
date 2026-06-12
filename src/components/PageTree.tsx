@@ -15,6 +15,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { Popover, useAnchor } from "./Popover";
+import { randomCoverCss } from "../lib/utils";
 
 export type Page = Doc<"pages">;
 
@@ -69,7 +70,7 @@ export function PageTreeItem({
 
   const addChild = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const id = await create({ parentId: page._id });
+    const id = await create({ parentId: page._id, cover: randomCoverCss() });
     if (!isExpanded) onToggle(page._id);
     onSelect(id);
   };
@@ -163,6 +164,9 @@ export function PageTreeItem({
           <span className={`tree-item-title${page.title ? "" : " untitled"}`}>
             {page.title || "Untitled"}
           </span>
+        )}
+        {Date.now() - page._creationTime < 10 * 60 * 1000 && (
+          <span className="new-badge">NEW</span>
         )}
         <span className="tree-item-actions">
           <button

@@ -444,12 +444,13 @@ textarea {
   opacity: 1;
 }
 .cover-action-btn {
-  background: var(--bg);
-  color: var(--text-secondary);
+  background: rgba(20, 20, 20, 0.72);
+  color: rgba(255, 255, 255, 0.92);
   font-size: 12.5px;
   font-weight: 500;
   padding: 4px 10px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(4px);
 }
 .cover-action-btn:first-child {
   border-radius: 6px 0 0 6px;
@@ -462,8 +463,8 @@ textarea {
   border-radius: 6px;
 }
 .cover-action-btn:hover {
-  background: var(--bg-hover);
-  color: var(--text);
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
 }
 
 .page-body {
@@ -485,6 +486,7 @@ textarea {
   padding: 4px;
   cursor: pointer;
   user-select: none;
+  z-index: 2;
 }
 .page-icon:hover {
   background: var(--bg-hover);
@@ -507,10 +509,17 @@ textarea {
   height: 28px;
   align-items: center;
   opacity: 0;
+  pointer-events: none;
   transition: opacity 120ms ease;
 }
 .page-head:hover .page-head-hover-actions {
   opacity: 1;
+  pointer-events: auto;
+}
+/* Keep the hover-actions row clear of the overlapping page emoji so the
+ * invisible buttons never fight the icon for the pointer (blinking hover). */
+.page-head.has-icon .page-head-hover-actions {
+  padding-left: 92px;
 }
 .head-action-btn {
   display: flex;
@@ -1661,6 +1670,86 @@ kbd {
 .focus-exit-btn:hover {
   opacity: 1;
   color: var(--text);
+}
+
+/* ===== Recent pages + NEW badge ===== */
+.recent-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  text-align: left;
+}
+.recent-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  flex-shrink: 0;
+  font-size: 14px;
+  color: var(--text-tertiary);
+}
+.new-badge {
+  margin-left: 6px;
+  flex-shrink: 0;
+  background: var(--accent);
+  color: #fff;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 2px 5px;
+  border-radius: 999px;
+  line-height: 1;
+}
+
+/* ===== Onboarding tour (driver.js theme) ===== */
+.driver-popover {
+  background: var(--bg-secondary, var(--bg));
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+.driver-popover-title {
+  font-size: 15px;
+  color: var(--text);
+}
+.driver-popover-description {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.driver-popover-progress-text {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+}
+.driver-popover-footer button {
+  background: var(--bg-input);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-shadow: none;
+  font-size: 12.5px;
+  padding: 4px 10px;
+}
+.driver-popover-footer button:hover {
+  background: var(--bg-hover);
+}
+.driver-popover-next-btn {
+  background: var(--accent) !important;
+  color: #fff !important;
+  border-color: var(--accent) !important;
+}
+.driver-popover-arrow-side-left.driver-popover-arrow {
+  border-left-color: var(--border);
+}
+.driver-popover-arrow-side-right.driver-popover-arrow {
+  border-right-color: var(--border);
+}
+.driver-popover-arrow-side-top.driver-popover-arrow {
+  border-top-color: var(--border);
+}
+.driver-popover-arrow-side-bottom.driver-popover-arrow {
+  border-bottom-color: var(--border);
 }
 
 /* ===== Misc ===== */

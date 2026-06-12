@@ -25,6 +25,9 @@ What this project demonstrates: a custom block-editor integration (BlockNote ext
 - **Templates gallery** — six ready-made pages (Meeting Notes, Project Tracker, Hiring Pipeline, Weekly Planner, 30-60-90 Onboarding, Content Calendar) that instantiate with real, typed databases in one click.
 - **Daily notes** — "Today's note" in the sidebar opens today's journal page (auto-created under a 📓 Journal section, one per day) with a starter checklist — the Logseq/Obsidian habit, one click away.
 - **Focus mode** — `Ctrl+Shift+F` hides the sidebar and topbar for distraction-free writing; a subtle pill in the corner (or the same shortcut) brings everything back.
+- **Onboarding tour** — a guided next/prev/skip walkthrough (driver.js) starts on first launch and is replayable from the **Tutorial** button; finishing it creates a live "Getting started" sample page with a real database to play with.
+- **Recent pages + NEW tags** — your five latest-edited pages sit at the top of the sidebar, and freshly created pages wear a NEW badge for ten minutes.
+- **Covers by default** — every new page gets a random gradient cover (change or remove it any time), so nothing starts looking empty.
 - **AI workspace generator** — "AI workspace" in the sidebar: paste your Anthropic API key, describe a project, and Claude (Opus 4.8) plans and creates a full starter workspace — pages, sub-pages, content, and seeded databases.
 - **Drawings** — `/drawing` embeds a full Excalidraw whiteboard, autosaved to Convex.
 - **Embeds** — `/youtube` embeds YouTube, Vimeo, or any web page; `/pdf` uploads a PDF with inline preview and download.

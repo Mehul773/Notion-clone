@@ -10,6 +10,7 @@ import {
   PlanDatabase,
   WorkspacePlan,
 } from "../lib/ai";
+import { randomCoverCss } from "../lib/utils";
 
 const KEY_STORAGE = "slate:anthropicKey";
 
@@ -77,6 +78,7 @@ export function AiDialog({
     const pageId = await convex.mutation(api.pages.create, {
       parentId,
       title: page.title,
+      cover: randomCoverCss(),
     });
     if (page.icon) {
       await convex.mutation(api.pages.setIcon, { pageId, icon: page.icon });

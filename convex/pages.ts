@@ -55,11 +55,13 @@ export const create = mutation({
   args: {
     parentId: v.optional(v.id("pages")),
     title: v.optional(v.string()),
+    cover: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const pageId = await ctx.db.insert("pages", {
       title: args.title ?? "",
       parentId: args.parentId,
+      cover: args.cover,
       order: await nextOrder(ctx, args.parentId),
       isFavorite: false,
       isTrashed: false,

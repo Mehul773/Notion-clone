@@ -4,7 +4,9 @@ import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import {
   CalendarDays,
+  FileText,
   FileUp,
+  GraduationCap,
   LayoutTemplate,
   Plus,
   Search,
@@ -14,6 +16,7 @@ import {
 } from "lucide-react";
 import { buildChildrenMap, Page, PageTreeItem } from "./PageTree";
 import { openDailyNote } from "../lib/dailyNote";
+import { randomCoverCss } from "../lib/utils";
 
 const EXPANDED_KEY = "slate:expanded";
 
@@ -26,6 +29,7 @@ export function Sidebar({
   onOpenAi,
   onOpenImport,
   onOpenTemplates,
+  onStartTour,
   onMove,
   width,
   setWidth,
@@ -38,6 +42,7 @@ export function Sidebar({
   onOpenAi: () => void;
   onOpenImport: () => void;
   onOpenTemplates: () => void;
+  onStartTour: () => void;
   onMove: (id: Id<"pages">) => void;
   width: number;
   setWidth: (w: number) => void;
@@ -68,9 +73,12 @@ export function Sidebar({
   const favorites = pages
     .filter((p) => p.isFavorite)
     .sort((a, b) => a.order - b.order);
+  const recent = [...pages]
+    .sort((a, b) => b.updatedAt - a.updatedAt)
+    .slice(0, 5);
 
   const newPage = async () => {
-    const id = await create({});
+    const id = await create({ cover: randomCoverCss() });
     onSelect(id);
   };
 
@@ -107,16 +115,17 @@ export function Sidebar({
         </div>
       </div>
       <div className="sidebar-actions">
-        <button className="sidebar-item" onClick={onOpenSearch}>
+        <button className="sidebar-item" data-tour="search" onClick={onOpenSearch}>
           <Search size={15} /> Search
           <span className="kbd-hint">Ctrl K</span>
         </button>
-        <button className="sidebar-item" onClick={newPage}>
+        <button className="sidebar-item" data-tour="new-page" onClick={newPage}>
           <SquarePen size={15} /> New page
           <span className="kbd-hint">Ctrl N</span>
         </button>
         <button
           className="sidebar-item"
+          data-tour="today"
           disabled={openingToday}
           onClick={async () => {
             if (openingToday) return;
@@ -130,13 +139,13 @@ export function Sidebar({
         >
           <CalendarDays size={15} /> Today's note
         </button>
-        <button className="sidebar-item" onClick={onOpenTemplates}>
+        <button className="sidebar-item" data-tour="templates" onClick={onOpenTemplates}>
           <LayoutTemplate size={15} /> Templates
         </button>
-        <button className="sidebar-item" onClick={onOpenAi}>
+        <button className="sidebar-item" data-tour="ai" onClick={onOpenAi}>
           <Sparkles size={15} /> AI workspace
         </button>
-        <button className="sidebar-item" onClick={onOpenImport}>
+        <button className="sidebar-item" data-tour="import" onClick={onOpenImport}>
           <FileUp size={15} /> Import Markdown
         </button>
       </div>
@@ -167,6 +176,30 @@ export function Sidebar({
           }
         }}
       >
+        {recent.length > 0 && (
+          <div data-tour="recent">
+            <div className="sidebar-section-label">Recent</div>
+            {recent.map((page) => (
+              <button
+                key={`recent-${page._id}`}
+                className={`tree-item recent-item${
+                  activePageId === page._id ? " active" : ""
+                }`}
+                onClick={() => onSelect(page._id)}
+              >
+                <span className="recent-icon">
+                  {page.icon ?? <FileText size={14} />}
+                </span>
+                <span className="tree-item-title">
+                  {page.title || "Untitled"}
+                </span>
+                {Date.now() - page._creationTime < 10 * 60 * 1000 && (
+                  <span className="new-badge">NEW</span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
         {favorites.length > 0 && (
           <>
             <div className="sidebar-section-label">Favorites</div>
@@ -184,8 +217,11 @@ export function Sidebar({
         </button>
       </div>
       <div className="sidebar-bottom">
-        <button className="sidebar-item" onClick={onOpenTrash}>
+        <button className="sidebar-item" data-tour="trash" onClick={onOpenTrash}>
           <Trash2 size={15} /> Trash
+        </button>
+        <button className="sidebar-item" onClick={onStartTour}>
+          <GraduationCap size={15} /> Tutorial
         </button>
       </div>
       <div

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useConvex, useMutation, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { Id } from "../convex/_generated/dataModel";
@@ -32,6 +32,9 @@ import {
 } from "./components/SettingsPopover";
 import { Popover, useAnchor } from "./components/Popover";
 import { getCurrentEditor } from "./lib/editorRegistry";
+import { randomCoverCss } from "./lib/utils";
+import { SAMPLE_PAGE_MARKDOWN, startTour, TOUR_DONE_KEY } from "./lib/tour";
+import { importMarkdownPage } from "./lib/markdownImport";
 
 const ACTIVE_KEY = "slate:activePage";
 const THEME_KEY = "slate:theme";
@@ -119,6 +122,7 @@ export default function App() {
       .then(() => localStorage.setItem("slate:searchBackfill", "1"));
   }, [convex]);
 
+
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem(THEME_KEY, theme);
@@ -142,6 +146,33 @@ export default function App() {
     else localStorage.removeItem(ACTIVE_KEY);
   }, []);
 
+  const finishTour = useCallback(async () => {
+    const existing = pages?.find(
+      (p) => p.title === "Getting started with Slate"
+    );
+    if (existing) {
+      selectPage(existing._id);
+      return;
+    }
+    const id = await importMarkdownPage(convex, SAMPLE_PAGE_MARKDOWN, {
+      convertTables: true,
+    });
+    selectPage(id);
+  }, [convex, pages, selectPage]);
+
+  // First launch: run the onboarding tour once the sidebar is on screen.
+  const tourStarted = useRef(false);
+  useEffect(() => {
+    if (pages === undefined || tourStarted.current) return;
+    if (localStorage.getItem(TOUR_DONE_KEY) === "1") return;
+    tourStarted.current = true;
+    const timer = setTimeout(
+      () => startTour({ onFinish: () => void finishTour() }),
+      600
+    );
+    return () => clearTimeout(timer);
+  }, [pages, finishTour]);
+
   // If the active page was trashed or deleted, clear the selection.
   const activePage = useMemo(
     () => pages?.find((p) => p._id === activePageId) ?? null,
@@ -154,7 +185,7 @@ export default function App() {
   }, [pages, activePageId, activePage, selectPage]);
 
   const newPage = useCallback(async () => {
-    const id = await create({});
+    const id = await create({ cover: randomCoverCss() });
     selectPage(id);
   }, [create, selectPage]);
 
@@ -237,6 +268,7 @@ export default function App() {
         onOpenAi={() => setAiOpen(true)}
         onOpenImport={() => setImportOpen(true)}
         onOpenTemplates={() => setTemplatesOpen(true)}
+        onStartTour={() => startTour({ onFinish: () => void finishTour() })}
         onMove={setMovePageId}
         width={sidebarWidth}
         setWidth={setSidebarWidth}

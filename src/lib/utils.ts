@@ -33,6 +33,12 @@ export const COVER_GRADIENTS: { name: string; css: string }[] = [
   { name: "Plum", css: "linear-gradient(135deg, #614385 0%, #516395 100%)" },
 ];
 
+/** Random gradient for new pages, so covers never start empty. */
+export function randomCoverCss() {
+  return COVER_GRADIENTS[Math.floor(Math.random() * COVER_GRADIENTS.length)]
+    .css;
+}
+
 /** Named tag colors, Notion-style. Users can pick one per option; unpicked
  * options fall back to a stable hash of the option text. */
 export const TAG_PALETTE: { id: string; label: string; bg: string; fg: string }[] = [

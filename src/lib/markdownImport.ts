@@ -3,6 +3,7 @@ import { ConvexReactClient } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { schema } from "../components/BlockEditor";
+import { randomCoverCss } from "./utils";
 
 /* Markdown import: paste or upload a .md file and turn it into a full page.
  * Optional YAML-ish frontmatter sets the page title/icon, the first H1 is
@@ -176,6 +177,7 @@ export async function importMarkdownPage(
   const pageId = await convex.mutation(api.pages.create, {
     title: title ?? "Imported page",
     parentId: options.parentId,
+    cover: randomCoverCss(),
   });
   if (icon) {
     await convex.mutation(api.pages.setIcon, { pageId, icon });
