@@ -4,11 +4,13 @@ import { Popover } from "./Popover";
 export type FontSettings = {
   editorSize: number;
   codeSize: number;
+  fontFamily: "default" | "serif" | "mono";
 };
 
 export const DEFAULT_FONT_SETTINGS: FontSettings = {
   editorSize: 15.5,
   codeSize: 13.5,
+  fontFamily: "default",
 };
 
 function Stepper({
@@ -62,6 +64,28 @@ export function SettingsPopover({
   const inElectron = !!window.slate;
   return (
     <Popover anchor={anchor} onClose={onClose} className="settings-popover" align="end">
+      <div className="menu-label">Font</div>
+      <div className="font-family-row">
+        {(
+          [
+            { id: "default", name: "Default", css: "inherit" },
+            { id: "serif", name: "Serif", css: "Georgia, serif" },
+            { id: "mono", name: "Mono", css: "ui-monospace, Consolas, monospace" },
+          ] as const
+        ).map((f) => (
+          <button
+            key={f.id}
+            className={`font-family-btn${
+              settings.fontFamily === f.id ? " active" : ""
+            }`}
+            onClick={() => setSettings({ ...settings, fontFamily: f.id })}
+          >
+            <span style={{ fontFamily: f.css, fontSize: 17 }}>Ag</span>
+            <span className="font-family-name">{f.name}</span>
+          </button>
+        ))}
+      </div>
+      <div className="menu-sep" />
       <div className="menu-label">Text</div>
       <Stepper
         label="Editor font size"

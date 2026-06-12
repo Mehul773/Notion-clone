@@ -1752,6 +1752,176 @@ kbd {
   border-bottom-color: var(--border);
 }
 
+/* ===== Sidebar collapse + filter ===== */
+.app.sidebar-collapsed .sidebar {
+  display: none;
+}
+.sidebar-collapse-btn {
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity 120ms;
+}
+.sidebar-top:hover .sidebar-collapse-btn {
+  opacity: 1;
+}
+.sidebar-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  color: var(--text-tertiary);
+}
+.sidebar-filter input {
+  width: 84px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 11.5px;
+}
+
+/* ===== Editor font family ===== */
+.editor-wrap .bn-editor {
+  font-family: var(--editor-font, inherit);
+}
+.font-family-row {
+  display: flex;
+  gap: 6px;
+  padding: 4px 10px 8px;
+}
+.font-family-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg-input);
+  color: var(--text);
+}
+.font-family-btn.active {
+  border-color: var(--accent);
+}
+.font-family-name {
+  font-size: 10.5px;
+  color: var(--text-tertiary);
+}
+
+/* ===== Cover picker tabs / GIFs / URL ===== */
+.cover-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px 4px 8px;
+}
+.cover-tab {
+  flex: 1;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: transparent;
+}
+.cover-tab.active {
+  background: var(--bg-hover);
+  color: var(--text);
+  font-weight: 600;
+}
+.cover-gif-search {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 12px;
+  color: var(--text);
+  outline: none;
+  margin-bottom: 6px;
+}
+.cover-gif-search:focus {
+  border-color: var(--accent);
+}
+.cover-grid.gifs {
+  max-height: 220px;
+  overflow-y: auto;
+}
+.cover-swatch.gif {
+  padding: 0;
+  overflow: hidden;
+  background: var(--bg-input);
+}
+.cover-swatch.gif img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cover-gif-note {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  padding: 10px 4px;
+  text-align: center;
+}
+.cover-gif-credit {
+  font-size: 9.5px;
+  color: var(--text-tertiary);
+  text-align: right;
+  padding: 2px 2px 4px;
+}
+.cover-url-row {
+  display: flex;
+  gap: 5px;
+  padding: 6px 0;
+}
+.cover-url-input {
+  flex: 1;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 11.5px;
+  color: var(--text);
+  outline: none;
+}
+.cover-url-row button {
+  font-size: 11.5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text);
+}
+.cover-url-row button:disabled {
+  opacity: 0.45;
+}
+
+/* ===== User templates ===== */
+.template-card-wrap {
+  position: relative;
+}
+.template-card-wrap .template-card {
+  width: 100%;
+}
+.template-delete {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 4px;
+  border-radius: 5px;
+  color: var(--text-tertiary);
+  background: transparent;
+  opacity: 0;
+  transition: opacity 120ms;
+}
+.template-card-wrap:hover .template-delete {
+  opacity: 1;
+}
+.template-delete:hover {
+  color: var(--danger);
+  background: var(--bg-hover);
+}
+
 /* ===== Misc ===== */
 .spinner {
   width: 22px;

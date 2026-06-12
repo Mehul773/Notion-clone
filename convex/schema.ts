@@ -60,4 +60,10 @@ export default defineSchema({
     scene: v.string(),
     updatedAt: v.number(),
   }),
+
+  userTemplates: defineTable({
+    name: v.string(),
+    icon: v.optional(v.string()),
+    markdown: v.string(),
+  }),
 });

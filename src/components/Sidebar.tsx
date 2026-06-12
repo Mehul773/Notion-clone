@@ -8,6 +8,8 @@ import {
   FileUp,
   GraduationCap,
   LayoutTemplate,
+  ListFilter,
+  PanelLeftClose,
   Plus,
   Search,
   Sparkles,
@@ -30,6 +32,7 @@ export function Sidebar({
   onOpenImport,
   onOpenTemplates,
   onStartTour,
+  onCollapse,
   onMove,
   width,
   setWidth,
@@ -43,6 +46,7 @@ export function Sidebar({
   onOpenImport: () => void;
   onOpenTemplates: () => void;
   onStartTour: () => void;
+  onCollapse: () => void;
   onMove: (id: Id<"pages">) => void;
   width: number;
   setWidth: (w: number) => void;
@@ -60,6 +64,7 @@ export function Sidebar({
     }
   });
   const [dragging, setDragging] = useState(false);
+  const [filter, setFilter] = useState("");
 
   useEffect(() => {
     localStorage.setItem(EXPANDED_KEY, JSON.stringify(expanded));
@@ -112,6 +117,13 @@ export function Sidebar({
         <div className="workspace-row">
           <div className="workspace-logo">S</div>
           <span className="workspace-name">Slate</span>
+          <button
+            className="tree-action-btn sidebar-collapse-btn"
+            title="Hide sidebar (Ctrl+\)"
+            onClick={onCollapse}
+          >
+            <PanelLeftClose size={15} />
+          </button>
         </div>
       </div>
       <div className="sidebar-actions">
@@ -208,10 +220,45 @@ export function Sidebar({
             ))}
           </>
         )}
-        <div className="sidebar-section-label">Pages</div>
-        {rootPages.map((page) => (
-          <PageTreeItem key={page._id} page={page} depth={0} {...treeProps} />
-        ))}
+        <div className="sidebar-section-label" style={{ display: "flex", alignItems: "center" }}>
+          Pages
+          <span className="sidebar-filter">
+            <ListFilter size={11} />
+            <input
+              placeholder="Filter…"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            />
+          </span>
+        </div>
+        {filter.trim() !== "" ? (
+          pages
+            .filter((p) =>
+              (p.title || "Untitled")
+                .toLowerCase()
+                .includes(filter.trim().toLowerCase())
+            )
+            .map((page) => (
+              <button
+                key={`filter-${page._id}`}
+                className={`tree-item recent-item${
+                  activePageId === page._id ? " active" : ""
+                }`}
+                onClick={() => onSelect(page._id)}
+              >
+                <span className="recent-icon">
+                  {page.icon ?? <FileText size={14} />}
+                </span>
+                <span className="tree-item-title">
+                  {page.title || "Untitled"}
+                </span>
+              </button>
+            ))
+        ) : (
+          rootPages.map((page) => (
+            <PageTreeItem key={page._id} page={page} depth={0} {...treeProps} />
+          ))
+        )}
         <button className="sidebar-item" style={{ marginTop: 4 }} onClick={newPage}>
           <Plus size={15} /> Add a page
         </button>

@@ -7,9 +7,11 @@ import {
   Copy,
   FileDown,
   FileText,
+  LayoutTemplate,
   Maximize2,
   Minimize2,
   Moon,
+  PanelLeftOpen,
   MoreHorizontal,
   Plus,
   Star,
@@ -81,6 +83,7 @@ export default function App() {
   const toggleFavorite = useMutation(api.pages.toggleFavorite);
   const duplicate = useMutation(api.pages.duplicate);
   const moveToTrash = useMutation(api.pages.moveToTrash);
+  const saveTemplate = useMutation(api.templates.save);
 
   const [activePageId, setActivePageId] = useState<Id<"pages"> | null>(
     () => (localStorage.getItem(ACTIVE_KEY) as Id<"pages">) || null
@@ -108,6 +111,10 @@ export default function App() {
   const [importOpen, setImportOpen] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(
+    () => localStorage.getItem("slate:sidebarOpen") !== "0"
+  );
+  const [templateSaved, setTemplateSaved] = useState(false);
   const [movePageId, setMovePageId] = useState<Id<"pages"> | null>(null);
   const [wordCount, setWordCount] = useState<number | null>(null);
   const fontMenu = useAnchor();
@@ -134,10 +141,22 @@ export default function App() {
   }, [sidebarWidth]);
 
   useEffect(() => {
+    localStorage.setItem("slate:sidebarOpen", sidebarOpen ? "1" : "0");
+  }, [sidebarOpen]);
+
+  useEffect(() => {
     localStorage.setItem(FONT_KEY, JSON.stringify(fontSettings));
     const root = document.documentElement;
     root.style.setProperty("--editor-fs", `${fontSettings.editorSize}px`);
     root.style.setProperty("--code-fs", `${fontSettings.codeSize}px`);
+    const families: Record<string, string> = {
+      default: "",
+      serif: "Georgia, 'Times New Roman', serif",
+      mono: "ui-monospace, 'Cascadia Mono', Consolas, monospace",
+    };
+    const family = families[fontSettings.fontFamily] ?? "";
+    if (family) root.style.setProperty("--editor-font", family);
+    else root.style.removeProperty("--editor-font");
   }, [fontSettings]);
 
   const selectPage = useCallback((id: Id<"pages"> | null) => {
@@ -200,6 +219,9 @@ export default function App() {
       } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "f" || e.key === "F")) {
         e.preventDefault();
         setFocusMode((f) => !f);
+      } else if ((e.ctrlKey || e.metaKey) && e.key === "\\") {
+        e.preventDefault();
+        setSidebarOpen((open) => !open);
       } else if ((e.ctrlKey || e.metaKey) && (e.key === "=" || e.key === "+")) {
         e.preventDefault();
         window.slate?.zoom(0.5);
@@ -258,7 +280,11 @@ export default function App() {
   }
 
   return (
-    <div className={`app${focusMode ? " focus-mode" : ""}`}>
+    <div
+      className={`app${focusMode ? " focus-mode" : ""}${
+        sidebarOpen ? "" : " sidebar-collapsed"
+      }`}
+    >
       <Sidebar
         pages={pages}
         activePageId={activePageId}
@@ -269,12 +295,22 @@ export default function App() {
         onOpenImport={() => setImportOpen(true)}
         onOpenTemplates={() => setTemplatesOpen(true)}
         onStartTour={() => startTour({ onFinish: () => void finishTour() })}
+        onCollapse={() => setSidebarOpen(false)}
         onMove={setMovePageId}
         width={sidebarWidth}
         setWidth={setSidebarWidth}
       />
       <div className="main">
         <div className="topbar">
+          {!sidebarOpen && (
+            <button
+              className="topbar-btn"
+              title="Show sidebar (Ctrl+\)"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <PanelLeftOpen size={16} />
+            </button>
+          )}
           <div className="breadcrumbs">
             {breadcrumbs.map((page, i) => (
               <span key={page._id} style={{ display: "flex", alignItems: "center", gap: 2, minWidth: 0 }}>
@@ -389,6 +425,32 @@ export default function App() {
             }}
           >
             <Copy size={14} /> Duplicate page
+          </button>
+          <button
+            className="menu-item"
+            disabled={templateSaved}
+            onClick={async () => {
+              const editor = getCurrentEditor();
+              if (!editor) return;
+              const md = await editor.blocksToMarkdownLossy(editor.document);
+              const name = activePage.title || "Untitled";
+              const frontmatter = `---\ntitle: ${name}\n${
+                activePage.icon ? `icon: ${activePage.icon}\n` : ""
+              }---\n\n`;
+              await saveTemplate({
+                name,
+                icon: activePage.icon,
+                markdown: frontmatter + md,
+              });
+              setTemplateSaved(true);
+              setTimeout(() => {
+                setTemplateSaved(false);
+                pageMenu.close();
+              }, 900);
+            }}
+          >
+            <LayoutTemplate size={14} />
+            {templateSaved ? "Saved to Templates!" : "Save as template"}
           </button>
           <div className="menu-sep" />
           <button
