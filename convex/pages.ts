@@ -106,6 +106,45 @@ export const toggleFavorite = mutation({
   },
 });
 
+/** Set or clear a page's password hash (SHA-256 hex, computed client-side). */
+export const setPassword = mutation({
+  args: { pageId: v.id("pages"), passwordHash: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.pageId, { passwordHash: args.passwordHash });
+  },
+});
+
+export const setSection = mutation({
+  args: {
+    pageId: v.id("pages"),
+    sectionId: v.optional(v.id("sections")),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.pageId, {
+      sectionId: args.sectionId,
+      parentId: undefined,
+      order: await nextOrder(ctx, undefined),
+    });
+  },
+});
+
+/** Pages that link to the given page (via @-mention pageLink blocks). */
+export const backlinks = query({
+  args: { pageId: v.id("pages") },
+  handler: async (ctx, args) => {
+    const docs = await ctx.db.query("docs").collect();
+    const linkers: Id<"pages">[] = [];
+    for (const doc of docs) {
+      if (doc.content.includes(args.pageId) && doc.pageId !== args.pageId) {
+        const page = await ctx.db.get(doc.pageId);
+        if (page && !page.isTrashed) linkers.push(doc.pageId);
+      }
+    }
+    const pages = await Promise.all(linkers.map((id) => ctx.db.get(id)));
+    return pages.filter((p): p is NonNullable<typeof p> => p !== null);
+  },
+});
+
 async function childrenOf(ctx: MutationCtx, pageId: Id<"pages">) {
   return await ctx.db
     .query("pages")

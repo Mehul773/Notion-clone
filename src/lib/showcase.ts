@@ -97,9 +97,17 @@ export async function createShowcasePage(
     p([t("A full Excalidraw canvas lives in this page. Sketch something:")]),
     { type: "drawing", props: { drawingId } },
 
+    h(2, [t("🔗 Connect & organize", { textColor: "blue" })]),
+    li([t("Type "), t("@", { code: true }), t(" anywhere to link another page — backlinks show up automatically at the bottom")]),
+    li([t("/mindmap", { code: true }), t(" → an editable "), t("mind map", { bold: true, textColor: "pink" }), t(" from a text outline")]),
+    li([t("Page ⋯ menu → "), t("Open to the right", { bold: true }), t(" for a side-by-side split")]),
+    li([t("Sidebar → "), t("New section", { bold: true }), t(" to group pages; drag pages into it")]),
+    li([t("Page ⋯ menu → "), t("Lock with password", { bold: true }), t(" to hide a page behind a passphrase")]),
+
     h(2, [t("💾 Your data, your rules", { textColor: "yellow" })]),
     li([t("⋯ menu → "), t("Export", { bold: true }), t(" as Markdown/HTML, or "), t("Save as template", { bold: true })]),
     li([t("Sidebar → "), t("Import Markdown", { bold: true }), t(" (tables become real databases)")]),
+    li([t("Aa menu → fonts, "), t("Simple mode", { bold: true }), t(", horizontal “/” menu. Shortcuts panel lets you "), t("rebind keys", { bold: true })]),
     li([t("Everything stored locally — no cloud, no account")]),
 
     { type: "quote", content: [t("Done exploring? Delete this page from its ⋯ menu. Or keep it — it likes you.")] },

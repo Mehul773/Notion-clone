@@ -32,6 +32,8 @@ Shows: custom block-editor work (BlockNote + 4 custom block types), realtime bac
 - Infinite nesting, drag-drop reorder, inline rename, deep duplicate, move-to, favorites, trash with restore.
 - Emoji icons + covers: gradient gallery, **GIF tab** (GIPHY trending/search), upload, or paste any image URL. Every new page gets a random cover.
 - Export as Markdown/HTML. **Save as template** — reuse from the Templates dialog.
+- **Page links** — type `@` to link another page; backlinks appear automatically. **Side-by-side** — "Open to the right" splits two pages. **Password-protect** any page (SHA-256, local). **Sections** group pages in the sidebar — drag pages in.
+- **Mind maps** — `/mindmap` renders an interactive tree from a Markdown outline (markmap).
 
 **Find & focus**
 - `Ctrl+K` — full-text search across titles *and* page content, with match snippets.
@@ -46,7 +48,7 @@ Shows: custom block-editor work (BlockNote + 4 custom block types), realtime bac
 - **Daily notes** — one click, today's journal page under 📓 Journal.
 - **AI workspace generator** — describe a project, Claude builds pages + seeded databases (optional, needs an Anthropic key).
 - **Drawings** — `/drawing` is a full Excalidraw whiteboard.
-- Fonts: size steppers, Default/Serif/Mono, or paste any **Google Font** name/link. **Simple mode** hides the advanced stuff. **Shortcuts** panel in the sidebar. Dark & light themes. Realtime sync across windows.
+- Fonts: size steppers, Default/Serif/Mono, or paste any **Google Font** name/link. **Simple mode** hides the advanced stuff. Optional **horizontal `/` menu**. **Shortcuts** panel with **rebindable keys**. Dark & light themes. Realtime sync across windows.
 
 ## Quick start
 

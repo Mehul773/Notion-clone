@@ -2352,6 +2352,273 @@ kbd {
   box-shadow: inset -2px 0 0 var(--accent);
 }
 
+/* ===== Side-by-side panes ===== */
+.page-panes {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.page-panes.split > .page-scroll {
+  flex: 1;
+  border-right: 1px solid var(--border);
+}
+.page-pane-second {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.pane-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  z-index: 20;
+  padding: 4px;
+  border-radius: 6px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+.pane-close:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+
+/* ===== Page links (@mention) + backlinks ===== */
+.page-link-mention {
+  color: var(--accent);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  cursor: pointer;
+  padding: 0 1px;
+  font-weight: 500;
+}
+.page-link-mention:hover {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.backlinks {
+  margin-top: 28px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.backlinks-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+}
+.backlink-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 6px 6px 0;
+  padding: 4px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+}
+.backlink-chip:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+
+/* ===== Password lock ===== */
+.page-lock {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--text-secondary);
+}
+.page-lock h2 {
+  color: var(--text);
+}
+.page-lock-input {
+  margin-top: 6px;
+  width: 240px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+  text-align: center;
+}
+.page-lock-input:focus {
+  border-color: var(--accent);
+}
+.page-lock-error {
+  color: var(--danger);
+  font-size: 12.5px;
+}
+
+/* ===== Mind map block ===== */
+.mindmap-block {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin: 6px 0;
+  overflow: hidden;
+  background: var(--bg-input);
+}
+.mindmap-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.mindmap-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.mindmap-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-secondary);
+}
+.mindmap-btn:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+.mindmap-svg {
+  width: 100%;
+  height: 320px;
+  display: block;
+}
+.mindmap-editor {
+  width: 100%;
+  height: 220px;
+  border: none;
+  outline: none;
+  resize: vertical;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 13px;
+  padding: 10px 12px;
+  line-height: 1.6;
+}
+
+/* ===== Sidebar sections ===== */
+.section-group {
+  border-radius: 6px;
+}
+.section-group.drop-active {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  outline: 1px dashed var(--accent);
+}
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.section-toggle-btn {
+  background: transparent;
+  color: var(--text-tertiary);
+  display: flex;
+}
+.section-toggle-btn svg {
+  transition: transform 120ms;
+}
+.section-name {
+  flex: 1;
+  cursor: default;
+}
+.section-rename {
+  flex: 1;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  background: var(--bg-input);
+  color: var(--text);
+  font-size: 11px;
+  padding: 1px 4px;
+  outline: none;
+}
+.section-x {
+  opacity: 0;
+  background: transparent;
+  color: var(--text-tertiary);
+  display: flex;
+  padding: 2px;
+  border-radius: 4px;
+}
+.section-head:hover .section-x {
+  opacity: 1;
+}
+.section-x:hover {
+  color: var(--danger);
+  background: var(--bg-hover);
+}
+.section-empty {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  padding: 4px 0 4px 24px;
+  font-style: italic;
+}
+.sidebar-item.subtle {
+  color: var(--text-tertiary);
+  font-size: 12.5px;
+}
+
+/* ===== Horizontal slash menu ===== */
+.editor-wrap.horizontal-slash .bn-suggestion-menu {
+  display: flex !important;
+  flex-wrap: wrap;
+  max-width: 540px;
+  gap: 2px;
+}
+.editor-wrap.horizontal-slash .bn-suggestion-menu-item {
+  width: 168px;
+}
+
+/* ===== Custom keybinding capture ===== */
+.shortcut-capture {
+  font-size: 11.5px;
+  padding: 3px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  min-width: 92px;
+}
+.shortcut-capture:hover {
+  border-color: var(--accent);
+}
+.shortcut-capture.capturing {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.shortcut-reset {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  color: var(--text-tertiary);
+  background: transparent;
+  padding: 2px 6px;
+  border-radius: 5px;
+}
+.shortcut-reset:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+
 /* ===== Misc ===== */
 .spinner {
   width: 22px;

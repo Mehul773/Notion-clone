@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { useConvex, useMutation } from "convex/react";
+import { useConvex, useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Id } from "../../convex/_generated/dataModel";
+import { Doc, Id } from "../../convex/_generated/dataModel";
 import {
   CalendarDays,
   ChevronRight,
   FileText,
   FileUp,
+  FolderPlus,
   GraduationCap,
   Keyboard,
   LayoutTemplate,
@@ -17,6 +18,7 @@ import {
   Sparkles,
   SquarePen,
   Trash2,
+  X,
 } from "lucide-react";
 import { buildChildrenMap, Page, PageTreeItem } from "./PageTree";
 import { openDailyNote } from "../lib/dailyNote";
@@ -60,6 +62,11 @@ export function Sidebar({
   const convex = useConvex();
   const create = useMutation(api.pages.create);
   const moveRelative = useMutation(api.pages.moveRelative);
+  const sections = useQuery(api.sections.list);
+  const createSection = useMutation(api.sections.create);
+  const renameSection = useMutation(api.sections.rename);
+  const removeSection = useMutation(api.sections.remove);
+  const setPageSection = useMutation(api.pages.setSection);
   const [openingToday, setOpeningToday] = useState(false);
   const [rootDropActive, setRootDropActive] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>(() => {
@@ -275,12 +282,47 @@ export function Sidebar({
               </button>
             ))
         ) : (
-          rootPages.map((page) => (
-            <PageTreeItem key={page._id} page={page} depth={0} {...treeProps} />
-          ))
+          <>
+            {(sections ?? []).map((section) => {
+              const secPages = rootPages.filter(
+                (p) => p.sectionId === section._id
+              );
+              return (
+                <SectionGroup
+                  key={section._id}
+                  section={section}
+                  pages={secPages}
+                  treeProps={treeProps}
+                  onRename={(name) =>
+                    void renameSection({ sectionId: section._id, name })
+                  }
+                  onRemove={() =>
+                    void removeSection({ sectionId: section._id })
+                  }
+                  onDropPage={(pageId) =>
+                    void setPageSection({ pageId, sectionId: section._id })
+                  }
+                />
+              );
+            })}
+            {rootPages
+              .filter((p) => !p.sectionId)
+              .map((page) => (
+                <PageTreeItem key={page._id} page={page} depth={0} {...treeProps} />
+              ))}
+          </>
         )}
         <button className="sidebar-item" style={{ marginTop: 4 }} onClick={newPage}>
           <Plus size={15} /> Add a page
+        </button>
+        <button
+          className="sidebar-item subtle"
+          onClick={() => {
+            const name = window.prompt("Section name:");
+            if (name && name.trim()) void createSection({ name: name.trim() });
+          }}
+        >
+          <FolderPlus size={15} /> New section
         </button>
       </div>
       <div className="sidebar-bottom">
@@ -298,6 +340,85 @@ export function Sidebar({
         className={`sidebar-resizer${dragging ? " dragging" : ""}`}
         onMouseDown={startResize}
       />
+    </div>
+  );
+}
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function SectionGroup({
+  section,
+  pages,
+  treeProps,
+  onRename,
+  onRemove,
+  onDropPage,
+}: {
+  section: Doc<"sections">;
+  pages: Page[];
+  treeProps: any;
+  onRename: (name: string) => void;
+  onRemove: () => void;
+  onDropPage: (pageId: Id<"pages">) => void;
+}) {
+  const [open, setOpen] = useState(true);
+  const [renaming, setRenaming] = useState(false);
+  const [name, setName] = useState(section.name);
+  const [dropActive, setDropActive] = useState(false);
+
+  return (
+    <div
+      className={`section-group${dropActive ? " drop-active" : ""}`}
+      onDragOver={(e) => {
+        if (!e.dataTransfer.types.includes("slate/page")) return;
+        e.preventDefault();
+        setDropActive(true);
+      }}
+      onDragLeave={() => setDropActive(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDropActive(false);
+        const id = e.dataTransfer.getData("slate/page");
+        if (id) onDropPage(id as Id<"pages">);
+      }}
+    >
+      <div className="sidebar-section-label section-head">
+        <button className="section-toggle-btn" onClick={() => setOpen((o) => !o)}>
+          <ChevronRight
+            size={11}
+            style={{ transform: open ? "rotate(90deg)" : undefined }}
+          />
+        </button>
+        {renaming ? (
+          <input
+            className="section-rename"
+            autoFocus
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onBlur={() => {
+              setRenaming(false);
+              if (name.trim()) onRename(name.trim());
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+            }}
+          />
+        ) : (
+          <span className="section-name" onDoubleClick={() => setRenaming(true)}>
+            {section.name}
+          </span>
+        )}
+        <button className="section-x" title="Delete section" onClick={onRemove}>
+          <X size={12} />
+        </button>
+      </div>
+      {open &&
+        (pages.length === 0 ? (
+          <div className="section-empty">Drag pages here</div>
+        ) : (
+          pages.map((page) => (
+            <PageTreeItem key={page._id} page={page} depth={0} {...treeProps} />
+          ))
+        ))}
     </div>
   );
 }

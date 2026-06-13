@@ -4,10 +4,12 @@ import { api } from "../convex/_generated/api";
 import { Id } from "../convex/_generated/dataModel";
 import {
   ChevronRight,
+  Columns2,
   Copy,
   FileDown,
   FileText,
   LayoutTemplate,
+  Lock,
   Maximize2,
   Minimize2,
   Moon,
@@ -19,6 +21,7 @@ import {
   Star,
   Sun,
   Trash2,
+  X,
 } from "lucide-react";
 import { Sidebar } from "./components/Sidebar";
 import { Page } from "./components/PageTree";
@@ -40,6 +43,8 @@ import { getCurrentEditor } from "./lib/editorRegistry";
 import { randomCoverCss } from "./lib/utils";
 import { startTour, TOUR_DONE_KEY } from "./lib/tour";
 import { createShowcasePage, SHOWCASE_TITLE } from "./lib/showcase";
+import { sha256 } from "./lib/crypto";
+import { comboFromEvent, loadKeybindings } from "./lib/keybindings";
 
 const ACTIVE_KEY = "slate:activePage";
 const THEME_KEY = "slate:theme";
@@ -87,6 +92,7 @@ export default function App() {
   const duplicate = useMutation(api.pages.duplicate);
   const moveToTrash = useMutation(api.pages.moveToTrash);
   const saveTemplate = useMutation(api.templates.save);
+  const setPassword = useMutation(api.pages.setPassword);
 
   const [activePageId, setActivePageId] = useState<Id<"pages"> | null>(
     () => (localStorage.getItem(ACTIVE_KEY) as Id<"pages">) || null
@@ -119,6 +125,7 @@ export default function App() {
   );
   const [templateSaved, setTemplateSaved] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [splitPageId, setSplitPageId] = useState<Id<"pages"> | null>(null);
   const [movePageId, setMovePageId] = useState<Id<"pages"> | null>(null);
   const [wordCount, setWordCount] = useState<number | null>(null);
   const fontMenu = useAnchor();
@@ -226,29 +233,56 @@ export default function App() {
     selectPage(id);
   }, [create, selectPage]);
 
+  // Page-link mentions and backlink chips ask App to navigate via this event.
+  useEffect(() => {
+    const onNavigate = (e: Event) => {
+      const id = (e as CustomEvent<{ pageId: Id<"pages"> }>).detail?.pageId;
+      if (id) selectPage(id);
+    };
+    window.addEventListener("slate:navigate", onNavigate);
+    return () => window.removeEventListener("slate:navigate", onNavigate);
+  }, [selectPage]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "p")) {
+      // Quick switcher also responds to Ctrl+P (fixed alias).
+      if ((e.ctrlKey || e.metaKey) && e.key === "p") {
         e.preventDefault();
         setSearchOpen((open) => !open);
-      } else if ((e.ctrlKey || e.metaKey) && e.key === "n") {
-        e.preventDefault();
-        void newPage();
-      } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "f" || e.key === "F")) {
-        e.preventDefault();
-        setFocusMode((f) => !f);
-      } else if ((e.ctrlKey || e.metaKey) && e.key === "\\") {
-        e.preventDefault();
-        setSidebarOpen((open) => !open);
-      } else if ((e.ctrlKey || e.metaKey) && (e.key === "=" || e.key === "+")) {
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === "=" || e.key === "+")) {
         e.preventDefault();
         window.slate?.zoom(0.5);
-      } else if ((e.ctrlKey || e.metaKey) && e.key === "-") {
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "-") {
         e.preventDefault();
         window.slate?.zoom(-0.5);
-      } else if ((e.ctrlKey || e.metaKey) && e.key === "0") {
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "0") {
         e.preventDefault();
         window.slate?.zoom(0);
+        return;
+      }
+      const combo = comboFromEvent(e);
+      const binds = loadKeybindings();
+      if (combo === binds.search) {
+        e.preventDefault();
+        setSearchOpen((open) => !open);
+      } else if (combo === binds.newPage) {
+        e.preventDefault();
+        void newPage();
+      } else if (combo === binds.focusMode) {
+        e.preventDefault();
+        setFocusMode((f) => !f);
+      } else if (combo === binds.toggleSidebar) {
+        e.preventDefault();
+        setSidebarOpen((open) => !open);
+      } else if (combo === binds.shortcuts) {
+        e.preventDefault();
+        setShortcutsOpen(true);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -419,7 +453,21 @@ export default function App() {
         </div>
 
         {activePageId && activePage ? (
-          <PageView pageId={activePageId} theme={theme} />
+          <div className={`page-panes${splitPageId ? " split" : ""}`}>
+            <PageView pageId={activePageId} theme={theme} />
+            {splitPageId && (
+              <div className="page-pane-second">
+                <button
+                  className="pane-close"
+                  title="Close split"
+                  onClick={() => setSplitPageId(null)}
+                >
+                  <X size={15} />
+                </button>
+                <PageView pageId={splitPageId} theme={theme} />
+              </div>
+            )}
+          </div>
         ) : (
           <div className="empty-state">
             <div className="empty-state-logo">S</div>
@@ -491,6 +539,33 @@ export default function App() {
           >
             <LayoutTemplate size={14} />
             {templateSaved ? "Saved to Templates!" : "Save as template"}
+          </button>
+          <button
+            className="menu-item"
+            onClick={() => {
+              pageMenu.close();
+              setSplitPageId(activePage._id);
+            }}
+          >
+            <Columns2 size={14} /> Open to the right
+          </button>
+          <button
+            className="menu-item"
+            onClick={async () => {
+              pageMenu.close();
+              if (activePage.passwordHash) {
+                void setPassword({ pageId: activePage._id, passwordHash: undefined });
+                return;
+              }
+              const pw = window.prompt("Set a password for this page:");
+              if (pw && pw.trim()) {
+                const hash = await sha256(pw.trim());
+                void setPassword({ pageId: activePage._id, passwordHash: hash });
+              }
+            }}
+          >
+            <Lock size={14} />
+            {activePage.passwordHash ? "Remove password" : "Lock with password"}
           </button>
           <div className="menu-sep" />
           <button

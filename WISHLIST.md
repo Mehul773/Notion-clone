@@ -54,23 +54,26 @@ context to start cold. Done items reference where they live in the code.
 | Weekly Task Manager + Habit Tracker templates (replaced Weekly Planner) | `src/lib/templates.ts` |
 | DB/drawing block deselect on outside click | mousedown handler in `BlockEditor.tsx` |
 
-## 🟡 Later (medium effort)
+## ✅ Done (fourth wave)
 
-- [ ] **Horizontal slash menu option** — replace BlockNote's vertical `SuggestionMenuController` list with a custom grouped horizontal component; setting in Aa menu (default vertical). Non-trivial: custom suggestion menu rendering.
-- [ ] **Custom keyboard shortcuts** — settings UI mapping action → key combo, stored in localStorage, applied in the `onKey` handler in `App.tsx`.
-- [ ] **Page links / @-mentions** — inline custom content in BlockNote linking to another page + backlinks panel. Needs custom inline content spec.
-- [ ] **Password-protected pages** — local-first approach: hash a passphrase per page, encrypt `docs.content` client-side (Web Crypto API, built-in & free), prompt on open. Note: protects content at rest, not a real multi-user ACL.
-- [ ] **Side-by-side view** — split `App.tsx` main area into two `PageView` panes with independent `activePageId`s; entry point "Open to the right" in the page ⋯ menu.
-- [ ] **Group pages in sidebar** — user-defined sections: a `sections` table (name, order) + `sectionId` on pages; drag pages between section headers (reuse the existing drag-drop wiring in `PageTree.tsx`).
+| Feature | Where |
+|---------|-------|
+| Side-by-side view (two page panes) | `page-panes` in `App.tsx`, "Open to the right" in page ⋯ menu |
+| Password-protected pages (SHA-256, Web Crypto) | `src/lib/crypto.ts`, `setPassword` in `convex/pages.ts`, lock gate in `PageView.tsx` |
+| Page links via `@` mention + backlinks panel | `PageLink` inline spec + `@` menu in `BlockEditor.tsx`, `backlinks` query, `navigateToPage` bridge in `src/lib/pageNav.ts` |
+| Mind map block (markmap, editable outline) | `src/components/blocks/MindMapBlock.tsx`, `/mindmap` slash item |
+| Sidebar sections (create, rename, delete, drag pages in) | `convex/sections.ts`, `SectionGroup` in `Sidebar.tsx`, `setSection` mutation |
+| Horizontal slash menu option | toggle in `SettingsPopover.tsx`, CSS in `styles.css` |
+| Custom keyboard shortcuts (capture + reset) | `src/lib/keybindings.ts`, editable rows in `ShortcutsModal.tsx`, applied in `App.tsx` `onKey` |
 
-## 🔴 Big bets (future)
+## 🔴 Big bets (future / not built yet)
 
-- [ ] **Mind maps in pages** — best path: a custom block embedding Excalidraw's mind-map-ish canvas (already shipped) or markmap (MIT, renders Markdown outlines as mind maps — good fit with our import pipeline).
 - [ ] **Timeline / Gantt view (multi-year)** — horizontal time axis over database rows with start/end date columns; library: vis-timeline (MIT). Design for 2-5 year spans (zoom levels: month/quarter/year).
 - [ ] **Graphing calculator block** — function-plot library (MIT, d3-based) inside a custom block; type `y = x^2`, get a graph.
 - [ ] **Linked whiteboard notes (Miro-style)** — Excalidraw elements that deep-link to Slate pages; needs a custom Excalidraw element type + click handling.
 - [ ] **Bullet points / rich blocks inside simple tables** — depends on BlockNote table cell capabilities; revisit after upgrading BlockNote (newer versions expanded table support — check changelog before building anything).
 - [ ] **Cell merging in simple tables** — same: BlockNote added colspan/rowspan support in newer releases; upgrade path, not custom code.
+- [ ] **Page-content encryption at rest** — password gate currently hides the UI but `docs.content` is still plaintext in Convex. True protection = encrypt the doc body with a key derived from the password (Web Crypto `deriveKey`/AES-GCM). Bigger change: editor must decrypt on unlock, re-encrypt on save.
 
 ## ❌ Not feasible (and why)
 

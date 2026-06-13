@@ -7,6 +7,8 @@ export default defineSchema({
     icon: v.optional(v.string()),
     cover: v.optional(v.string()),
     parentId: v.optional(v.id("pages")),
+    sectionId: v.optional(v.id("sections")),
+    passwordHash: v.optional(v.string()),
     order: v.number(),
     isFavorite: v.boolean(),
     isTrashed: v.boolean(),
@@ -76,5 +78,10 @@ export default defineSchema({
     name: v.string(),
     icon: v.optional(v.string()),
     markdown: v.string(),
+  }),
+
+  sections: defineTable({
+    name: v.string(),
+    order: v.number(),
   }),
 });

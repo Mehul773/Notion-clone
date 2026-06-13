@@ -3,6 +3,7 @@ import {
   BlockNoteSchema,
   combineByGroup,
   defaultBlockSpecs,
+  defaultInlineContentSpecs,
   filterSuggestionItems,
   insertOrUpdateBlockForSlashMenu,
   PartialBlock,
@@ -10,6 +11,7 @@ import {
 import "@blocknote/core/fonts/inter.css";
 import {
   createReactBlockSpec,
+  createReactInlineContentSpec,
   DefaultReactSuggestionItem,
   getDefaultReactSlashMenuItems,
   SuggestionMenuController,
@@ -17,16 +19,18 @@ import {
 } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
-import { useConvex, useMutation } from "convex/react";
+import { useConvex, useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
-import { FileText, MonitorPlay, PenTool, Table } from "lucide-react";
+import { FileText, MonitorPlay, Network, PenTool, Table } from "lucide-react";
 import { DatabaseTable } from "./DatabaseTable";
 import { EmbedView } from "./blocks/EmbedBlock";
 import { PdfView } from "./blocks/PdfBlock";
 import { DrawingView } from "./blocks/DrawingBlock";
+import { MindMapView } from "./blocks/MindMapBlock";
 import { debounce } from "../lib/utils";
 import { clearCurrentEditor, setCurrentEditor } from "../lib/editorRegistry";
+import { navigateToPage } from "../lib/pageNav";
 
 /** Notion-style database, embedded in the document as a custom block. */
 const DatabaseBlock = createReactBlockSpec(
@@ -85,6 +89,46 @@ const DrawingBlock = createReactBlockSpec(
   }
 );
 
+/** Interactive mind map (markmap) rendered from a Markdown outline. */
+const MindMapBlock = createReactBlockSpec(
+  {
+    type: "mindmap",
+    propSchema: {
+      source: { default: "" },
+    },
+    content: "none",
+  },
+  {
+    render: (props) => (
+      <MindMapView block={props.block} editor={props.editor} />
+    ),
+  }
+);
+
+/** @-mention link to another page. Clicking navigates there. */
+const PageLink = createReactInlineContentSpec(
+  {
+    type: "pageLink",
+    propSchema: {
+      pageId: { default: "" },
+      label: { default: "Untitled" },
+    },
+    content: "none",
+  },
+  {
+    render: (props) => (
+      <span
+        className="page-link-mention"
+        onClick={() =>
+          navigateToPage(props.inlineContent.props.pageId as Id<"pages">)
+        }
+      >
+        {props.inlineContent.props.label || "Untitled"}
+      </span>
+    ),
+  }
+);
+
 export const schema = BlockNoteSchema.create({
   blockSpecs: {
     ...defaultBlockSpecs,
@@ -92,6 +136,11 @@ export const schema = BlockNoteSchema.create({
     embed: EmbedBlock(),
     pdf: PdfBlock(),
     drawing: DrawingBlock(),
+    mindmap: MindMapBlock(),
+  },
+  inlineContentSpecs: {
+    ...defaultInlineContentSpecs,
+    pageLink: PageLink,
   },
 });
 
@@ -108,6 +157,9 @@ export function BlockEditor({
   const save = useMutation(api.docs.save);
   const saveRef = useRef(save);
   saveRef.current = save;
+  const allPages = useQuery(api.pages.list) ?? [];
+  const pagesRef = useRef(allPages);
+  pagesRef.current = allPages;
 
   const parsed = useMemo<PartialBlock<typeof schema.blockSchema>[] | undefined>(() => {
     if (!initialContent) return undefined;
@@ -180,8 +232,17 @@ export function BlockEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageId, editor]);
 
+  let horizontalMenu = false;
+  try {
+    horizontalMenu =
+      JSON.parse(localStorage.getItem("slate:fontSettings") ?? "{}")
+        .horizontalSlashMenu === true;
+  } catch {
+    horizontalMenu = false;
+  }
+
   return (
-    <div className="editor-wrap">
+    <div className={`editor-wrap${horizontalMenu ? " horizontal-slash" : ""}`}>
       <BlockNoteView
         editor={editor}
         theme={theme}
@@ -260,11 +321,45 @@ export function BlockEditor({
                   insertOrUpdateBlockForSlashMenu(editor, { type: "pdf" });
                 },
               },
+              {
+                title: "Mind map",
+                subtext: "Interactive mind map from a text outline",
+                aliases: ["mindmap", "mind", "map", "brainstorm", "tree"],
+                group: "Advanced",
+                icon: <Network size={18} />,
+                onItemClick: () => {
+                  insertOrUpdateBlockForSlashMenu(editor, { type: "mindmap" });
+                },
+              },
             ];
             return filterSuggestionItems(
               combineByGroup(getDefaultReactSlashMenuItems(editor), customItems),
               query
             );
+          }}
+        />
+        <SuggestionMenuController
+          triggerCharacter="@"
+          getItems={async (query) => {
+            const q = query.trim().toLowerCase();
+            return pagesRef.current
+              .filter((p) =>
+                (p.title || "Untitled").toLowerCase().includes(q)
+              )
+              .slice(0, 10)
+              .map((p) => ({
+                title: p.title || "Untitled",
+                icon: <span>{p.icon ?? "📄"}</span>,
+                onItemClick: () => {
+                  editor.insertInlineContent([
+                    {
+                      type: "pageLink",
+                      props: { pageId: p._id, label: p.title || "Untitled" },
+                    },
+                    " ",
+                  ]);
+                },
+              }));
           }}
         />
       </BlockNoteView>

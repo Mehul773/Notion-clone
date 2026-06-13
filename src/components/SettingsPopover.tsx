@@ -7,6 +7,7 @@ export type FontSettings = {
   fontFamily: "default" | "serif" | "mono";
   googleFont: string;
   simpleMode: boolean;
+  horizontalSlashMenu: boolean;
 };
 
 export const DEFAULT_FONT_SETTINGS: FontSettings = {
@@ -15,6 +16,7 @@ export const DEFAULT_FONT_SETTINGS: FontSettings = {
   fontFamily: "default",
   googleFont: "",
   simpleMode: false,
+  horizontalSlashMenu: false,
 };
 
 /** Accepts a font name ("Lobster") or a fonts.google.com URL and returns
@@ -181,6 +183,19 @@ export function SettingsPopover({
             }
           />
           {settings.simpleMode ? "On" : "Off"}
+        </label>
+      </div>
+      <div className="settings-row">
+        <span className="settings-label">Horizontal “/” menu</span>
+        <label className="md-toggle" title="Lay the slash command menu out in horizontal rows by group">
+          <input
+            type="checkbox"
+            checked={settings.horizontalSlashMenu}
+            onChange={(e) =>
+              setSettings({ ...settings, horizontalSlashMenu: e.target.checked })
+            }
+          />
+          {settings.horizontalSlashMenu ? "On" : "Off"}
         </label>
       </div>
       <div className="menu-sep" />

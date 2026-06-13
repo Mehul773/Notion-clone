@@ -1,21 +1,21 @@
-import { Keyboard } from "lucide-react";
+import { useState } from "react";
+import { Keyboard, RotateCcw } from "lucide-react";
 import { Modal } from "./Popover";
+import {
+  ACTIONS,
+  ActionId,
+  comboFromEvent,
+  DEFAULT_KEYBINDINGS,
+  loadKeybindings,
+  saveKeybindings,
+} from "../lib/keybindings";
 
-const GROUPS: { label: string; rows: [string, string][] }[] = [
-  {
-    label: "General",
-    rows: [
-      ["Ctrl K", "Search everything"],
-      ["Ctrl N", "New page"],
-      ["Ctrl \\", "Toggle sidebar"],
-      ["Ctrl Shift F", "Focus mode"],
-      ["Ctrl + / − / 0", "Zoom in / out / reset"],
-    ],
-  },
+const STATIC_GROUPS: { label: string; rows: [string, string][] }[] = [
   {
     label: "Editor",
     rows: [
       ["/", "Insert any block"],
+      ["@", "Link another page"],
       ["* Space", "Bullet list"],
       ["1. Space", "Numbered list"],
       ["> Space", "Quote"],
@@ -35,13 +35,61 @@ const GROUPS: { label: string; rows: [string, string][] }[] = [
 ];
 
 export function ShortcutsModal({ onClose }: { onClose: () => void }) {
+  const [binds, setBinds] = useState(loadKeybindings());
+  const [capturing, setCapturing] = useState<ActionId | null>(null);
+
+  const update = (id: ActionId, combo: string) => {
+    const next = { ...binds, [id]: combo };
+    setBinds(next);
+    saveKeybindings(next);
+  };
+
   return (
-    <Modal onClose={onClose} width={460}>
+    <Modal onClose={onClose} width={480}>
       <div className="ai-dialog">
         <div className="ai-dialog-title">
           <Keyboard size={17} /> Keyboard shortcuts
         </div>
-        {GROUPS.map((group) => (
+
+        <div className="menu-label" style={{ display: "flex", alignItems: "center" }}>
+          Customizable
+          <button
+            className="shortcut-reset"
+            title="Reset to defaults"
+            onClick={() => {
+              setBinds({ ...DEFAULT_KEYBINDINGS });
+              saveKeybindings({ ...DEFAULT_KEYBINDINGS });
+            }}
+          >
+            <RotateCcw size={12} /> Reset
+          </button>
+        </div>
+        {ACTIONS.map((action) => (
+          <div className="shortcut-row" key={action.id}>
+            <span className="shortcut-desc" style={{ flex: 1 }}>
+              {action.label}
+            </span>
+            <button
+              className={`shortcut-capture${capturing === action.id ? " capturing" : ""}`}
+              onClick={() => setCapturing(action.id)}
+              onKeyDown={(e) => {
+                if (capturing !== action.id) return;
+                e.preventDefault();
+                if (e.key === "Escape") {
+                  setCapturing(null);
+                  return;
+                }
+                if (["Control", "Shift", "Alt", "Meta"].includes(e.key)) return;
+                update(action.id, comboFromEvent(e.nativeEvent));
+                setCapturing(null);
+              }}
+            >
+              {capturing === action.id ? "Press keys…" : binds[action.id]}
+            </button>
+          </div>
+        ))}
+
+        {STATIC_GROUPS.map((group) => (
           <div key={group.label}>
             <div className="menu-label">{group.label}</div>
             {group.rows.map(([keys, what]) => (

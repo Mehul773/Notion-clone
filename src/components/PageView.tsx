@@ -2,12 +2,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
-import { Image, Smile } from "lucide-react";
+import { Image, Lock, Smile } from "lucide-react";
 import { BlockEditor } from "./BlockEditor";
 import { IconPicker } from "./IconPicker";
 import { CoverPicker } from "./CoverPicker";
 import { useAnchor } from "./Popover";
 import { debounce } from "../lib/utils";
+import { sha256 } from "../lib/crypto";
+import { navigateToPage } from "../lib/pageNav";
 
 export function PageView({
   pageId,
@@ -18,6 +20,7 @@ export function PageView({
 }) {
   const page = useQuery(api.pages.get, { pageId });
   const doc = useQuery(api.docs.get, { pageId });
+  const backlinks = useQuery(api.pages.backlinks, { pageId });
   const rename = useMutation(api.pages.rename);
   const setIcon = useMutation(api.pages.setIcon);
   const setCover = useMutation(api.pages.setCover);
@@ -26,14 +29,22 @@ export function PageView({
   const coverPicker = useAnchor();
 
   const [title, setTitle] = useState<string | null>(null);
+  const [unlocked, setUnlocked] = useState(false);
+  const [pwInput, setPwInput] = useState("");
+  const [pwError, setPwError] = useState(false);
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const debouncedRename = useMemo(
     () => debounce((t: string) => void rename({ pageId, title: t }), 350),
     [pageId, rename]
   );
 
-  // Reset local title state when switching pages.
-  useEffect(() => setTitle(null), [pageId]);
+  // Reset local state when switching pages.
+  useEffect(() => {
+    setTitle(null);
+    setUnlocked(false);
+    setPwInput("");
+    setPwError(false);
+  }, [pageId]);
 
   useEffect(() => {
     const el = titleRef.current;
@@ -60,6 +71,34 @@ export function PageView({
 
   const displayTitle = title ?? page.title;
   const isImage = page.cover?.startsWith("http");
+
+  if (page.passwordHash && !unlocked) {
+    return (
+      <div className="page-lock">
+        <Lock size={36} />
+        <h2>{page.icon} {page.title || "Locked page"}</h2>
+        <p>This page is password protected.</p>
+        <input
+          type="password"
+          className="page-lock-input"
+          placeholder="Enter password…"
+          autoFocus
+          value={pwInput}
+          onChange={(e) => {
+            setPwInput(e.target.value);
+            setPwError(false);
+          }}
+          onKeyDown={async (e) => {
+            if (e.key !== "Enter") return;
+            const hash = await sha256(pwInput);
+            if (hash === page.passwordHash) setUnlocked(true);
+            else setPwError(true);
+          }}
+        />
+        {pwError && <span className="page-lock-error">Wrong password</span>}
+      </div>
+    );
+  }
 
   return (
     <div className="page-scroll">
@@ -140,6 +179,21 @@ export function PageView({
           initialContent={doc?.content ?? ""}
           theme={theme}
         />
+        {backlinks && backlinks.length > 0 && (
+          <div className="backlinks">
+            <div className="backlinks-label">Linked from</div>
+            {backlinks.map((b) => (
+              <button
+                key={b._id}
+                className="backlink-chip"
+                onClick={() => navigateToPage(b._id)}
+              >
+                <span>{b.icon ?? "📄"}</span>
+                {b.title || "Untitled"}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {iconPicker.anchor && (
