@@ -8,7 +8,7 @@ Notion-style workspace for Windows. Pages, databases, drawings, notes — one de
 
 Portfolio project: Notion rebuilt as a real desktop app. Evaluate it in two minutes:
 
-1. [Quick start](#quick-start) — one `npm install`, one `npm run dev`. No accounts, no API keys.
+1. [Download the installer](#download--install-windows), double-click, done — no Node, no terminal, no accounts, no API keys. (Or [run from source](#run-from-source).)
 2. The built-in tour starts on first launch (with memes). Finish it — it builds a demo page showing every feature.
 3. Create a page, type `/`, insert a **database**. Switch it to **Board**, **Calendar**, **Chart**. Add a **Formula** column.
 4. Click **Import Markdown**, paste any `.md` file — tables become live typed databases.
@@ -50,9 +50,19 @@ Shows: custom block-editor work (BlockNote + 4 custom block types), realtime bac
 - **Drawings** — `/drawing` is a full Excalidraw whiteboard.
 - Fonts: size steppers, Default/Serif/Mono, or paste any **Google Font** name/link. **Simple mode** hides the advanced stuff. Optional **horizontal `/` menu**. **Shortcuts** panel with **rebindable keys**. Dark & light themes. Realtime sync across windows.
 
-## Quick start
+## Download & install (Windows)
 
-Needs **Node.js 18+** and **npm**. Windows is the primary target; macOS/Linux also work.
+1. Open the [**Releases** page](https://github.com/Mehul773/Notion-clone/releases) and download **`Slate Setup 1.0.0.exe`**.
+2. Double-click it. Windows SmartScreen may warn because the app isn't code-signed yet — click **More info → Run anyway**.
+3. Slate installs and opens. That's it.
+
+No Node, no terminal, no accounts, no API keys. The database engine ships inside the app and runs locally on `127.0.0.1`. Everything — pages, databases, files, search — lives on your machine under `%APPDATA%/Slate`. It works fully offline, and uninstalling is a normal Windows uninstall.
+
+> First launch sets up your local workspace and starts a quick tour. Only the optional **AI workspace generator** needs an [Anthropic API key](https://console.anthropic.com/); that key stays in `localStorage` and goes only to Anthropic. Everything else is offline.
+
+## Run from source
+
+For development, or to build the installer yourself. Needs **Node.js 18+** and **npm**. Windows is the primary target; macOS/Linux also work.
 
 ```bash
 git clone https://github.com/Mehul773/Notion-clone.git
@@ -61,9 +71,7 @@ npm install
 npm run dev        # Convex (local) + Vite + Electron together
 ```
 
-First run downloads the Convex local backend and writes `.env.local` automatically. All data lives on your machine (`~/.convex`). No account, no cloud.
-
-> Only the **AI workspace generator** needs an [Anthropic API key](https://console.anthropic.com/). The key stays in `localStorage` and goes only to Anthropic. Everything else works offline.
+First run downloads the Convex local backend and writes `.env.local` automatically. All data lives on your machine. No account, no cloud.
 
 ## Import a page from Markdown
 
@@ -109,19 +117,22 @@ Full list lives in the app (sidebar → **Shortcuts**). Highlights:
 - **BlockNote** — block editor, extended with custom database/drawing/embed/PDF blocks
 - **driver.js** (tour), **expr-eval** (formulas), **lucide-react** + **emoji-mart**
 
-## Production build
+## Build the installer
 
 ```bash
-npm run dist       # typecheck + vite build + electron-builder → release/
+npm run dist       # seed backend + vite build + electron-builder → release/
 ```
 
-> The packaged app still expects the Convex dev deployment (`npx convex dev`). For Convex cloud: `npx convex login && npx convex dev --configure`, then rebuild.
+This produces a fully self-contained installer at `release/Slate Setup <version>.exe`. `predist` runs `scripts/seed-backend.mjs`, which deploys the Convex functions into a clean seed deployment and copies the `convex-local-backend` binary into `electron/backend/`. `electron-builder` bundles both as app resources. At runtime the Electron main process starts the backend on `127.0.0.1:3210`, seeds the user's workspace on first launch, and shuts the backend down on quit — so the shipped app needs no `convex dev`, no Node, and no network. Run `npm run dist` on a machine where `npm run dev` has succeeded at least once (so the backend binary is cached locally).
+
+To publish: create a GitHub Release and upload `release/Slate Setup <version>.exe` (the `release/` folder is git-ignored — the installer is too large to commit).
 
 ## Project layout
 
 ```
-electron/        main process + preload
+electron/        main process + preload, bundled backend config + seed
 convex/          schema + server functions (pages, docs, database, templates, files, search)
+scripts/         seed-backend.mjs (build-time: deploy functions into the shipped seed)
 src/
   components/    Sidebar, PageTree, PageView, BlockEditor, DatabaseTable, DatabaseViews,
                  ImportMarkdownDialog, TemplatesDialog, AiDialog, QuickSwitcher, ShortcutsModal…
@@ -130,6 +141,7 @@ src/
 
 ## Troubleshooting
 
-- **Blank window on first run** — Convex backend still downloading; watch the `convex` panel, reload (`Ctrl+R`) when ready.
-- **Port 5173 busy** — stop the other Vite, or change the port in `vite.config.ts` + `package.json`.
-- **Reset all data** — stop the app, delete the local deployment under `~/.convex`.
+- **Reset all data (installed app)** — quit Slate, delete `%APPDATA%/Slate/convex-data`, relaunch. The workspace re-seeds clean.
+- **Slate won't start / "could not start" dialog** — another program is using port `3210`. Close it (or any running `npm run dev` of this project) and relaunch.
+- **Blank window when running from source** — Convex backend still downloading; watch the `convex` panel, reload (`Ctrl+R`) when ready.
+- **Port 5173 busy (from source)** — stop the other Vite, or change the port in `vite.config.ts` + `package.json`.

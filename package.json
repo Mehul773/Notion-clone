@@ -11,6 +11,8 @@
     "dev:vite": "vite",
     "dev:electron": "wait-on tcp:5173 && electron .",
     "build": "tsc -b && vite build",
+    "seed": "node scripts/seed-backend.mjs",
+    "predist": "node scripts/seed-backend.mjs",
     "dist": "npm run build && electron-builder",
     "typecheck": "tsc --noEmit"
   },
@@ -19,13 +21,29 @@
     "productName": "Slate",
     "files": [
       "dist/**/*",
-      "electron/**/*"
+      "electron/**/*",
+      "!electron/backend/**"
+    ],
+    "extraResources": [
+      {
+        "from": "electron/backend",
+        "to": "backend",
+        "filter": ["**/*"]
+      }
     ],
     "directories": {
       "output": "release"
     },
     "win": {
       "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Slate"
     }
   },
   "devDependencies": {
