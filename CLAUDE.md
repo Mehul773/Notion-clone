@@ -50,6 +50,7 @@ When you add/change a feature, update ALL the touchpoints:
 7. **Shortcuts modal** (`src/components/ShortcutsModal.tsx`) — new keybinding → new row.
 
 Working style:
-- Use codegraph / code-review-graph MCP first to explore — cheaper than Grep/Read.
+- **Use `/caveman ultra` every session** — terse, actionable reviews. No fluff.
+- **Use codegraph / code-review-graph MCP first** to explore — cheaper than Grep/Read. Graph queries before file reads.
 - Be creative. Think like a daily Notion power-user: what would they miss? what annoys them? Ship that.
 - Caveman mode for commit messages and summaries. Test in preview before commit. Commit + push after testing.

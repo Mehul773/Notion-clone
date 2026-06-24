@@ -66,6 +66,19 @@ context to start cold. Done items reference where they live in the code.
 | Horizontal slash menu option | toggle in `SettingsPopover.tsx`, CSS in `styles.css` |
 | Custom keyboard shortcuts (capture + reset) | `src/lib/keybindings.ts`, editable rows in `ShortcutsModal.tsx`, applied in `App.tsx` `onKey` |
 
+## ✅ Done (fifth wave — meme/mindmap polish + DB delete)
+
+| Feature | Where |
+|---------|-------|
+| Tour meme render lag fixed (downsized GIFs + preload on tour start) | `gif()` + `preloadMemes()` in `src/lib/tour.ts` |
+| Tour meme overflow fixed (full meme visible, `object-fit: contain`) | `.driver-popover .tour-gif` in `styles.css` |
+| 🎲 reroll now guaranteed-different (index-based, not src-string compare) | `randomIndex` + `__slateNextMeme` in `src/lib/tour.ts` |
+| Delete card in Board view (table view already had hover-gutter delete) | `db-card-delete` in `DatabaseViews.tsx` + CSS |
+| Shortcuts modal no longer clipped (scrolls inside 70vh modal) | `.modal > .ai-dialog` overflow in `styles.css` |
+| Live mind map embedded on "Getting started" showcase page | `{ type: "mindmap" }` block in `src/lib/showcase.ts` |
+| `/meme` slash item → GIPHY picker → inserts image block | `GifPickerModal.tsx`, slash item in `BlockEditor.tsx` |
+| "Copy AI prompt" button on mind map block (paste outline back to import) | `MINDMAP_AI_PROMPT` + button in `MindMapBlock.tsx` |
+
 ## 🔴 Big bets (future / not built yet)
 
 - [ ] **Timeline / Gantt view (multi-year)** — horizontal time axis over database rows with start/end date columns; library: vis-timeline (MIT). Design for 2-5 year spans (zoom levels: month/quarter/year).
@@ -73,7 +86,6 @@ context to start cold. Done items reference where they live in the code.
 - [ ] **Linked whiteboard notes (Miro-style)** — Excalidraw elements that deep-link to Slate pages; needs a custom Excalidraw element type + click handling.
 - [ ] **Bullet points / rich blocks inside simple tables** — depends on BlockNote table cell capabilities; revisit after upgrading BlockNote (newer versions expanded table support — check changelog before building anything).
 - [ ] **Cell merging in simple tables** — same: BlockNote added colspan/rowspan support in newer releases; upgrade path, not custom code.
-- [ ] **Page-content encryption at rest** — password gate currently hides the UI but `docs.content` is still plaintext in Convex. True protection = encrypt the doc body with a key derived from the password (Web Crypto `deriveKey`/AES-GCM). Bigger change: editor must decrypt on unlock, re-encrypt on save.
 
 ## ❌ Not feasible (and why)
 

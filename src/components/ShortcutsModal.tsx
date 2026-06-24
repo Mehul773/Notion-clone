@@ -15,6 +15,7 @@ const STATIC_GROUPS: { label: string; rows: [string, string][] }[] = [
     label: "Editor",
     rows: [
       ["/", "Insert any block"],
+      ["/meme", "Search & insert a meme / GIF"],
       ["@", "Link another page"],
       ["* Space", "Bullet list"],
       ["1. Space", "Numbered list"],

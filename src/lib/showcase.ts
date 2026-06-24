@@ -66,7 +66,7 @@ export async function createShowcasePage(
     li([t("> + space", { code: true }), t(" → quote")]),
     li([t("# ## ###", { code: true }), t(" + space → headings")]),
     li([t("```", { code: true }), t(" → code block")]),
-    li([t("/", { code: true }), t(" → every block: todo, table, PDF, YouTube, GIF…")]),
+    li([t("/", { code: true }), t(" → every block: todo, table, PDF, YouTube, "), t("/meme", { code: true }), t(" GIF picker…")]),
 
     h(2, [t("✅ Try these", { textColor: "green" })]),
     todo([t("Select this text → toolbar: "), t("bold", { bold: true }), t(", "), t("color", { textColor: "red" }), t(", more")]),
@@ -99,7 +99,14 @@ export async function createShowcasePage(
 
     h(2, [t("🔗 Connect & organize", { textColor: "blue" })]),
     li([t("Type "), t("@", { code: true }), t(" anywhere to link another page — backlinks show up automatically at the bottom")]),
-    li([t("/mindmap", { code: true }), t(" → an editable "), t("mind map", { bold: true, textColor: "pink" }), t(" from a text outline")]),
+    li([t("/mindmap", { code: true }), t(" → an editable "), t("mind map", { bold: true, textColor: "pink" }), t(" from a text outline. Hit "), t("Edit", { bold: true }), t(" on the one below, or "), t("Copy AI prompt", { bold: true }), t(" to have Claude draft one:")]),
+    {
+      type: "mindmap",
+      props: {
+        source:
+          "# Slate\n## Write\n- Pages & sub-pages\n- Markdown shortcuts\n- /mindmap\n## Organize\n- Databases\n- 4 views\n- Sections\n## Make it yours\n- Covers & icons\n- Fonts & themes",
+      },
+    },
     li([t("Page ⋯ menu → "), t("Open to the right", { bold: true }), t(" for a side-by-side split")]),
     li([t("Sidebar → "), t("New section", { bold: true }), t(" to group pages; drag pages into it")]),
     li([t("Page ⋯ menu → "), t("Lock with password", { bold: true }), t(" to hide a page behind a passphrase")]),

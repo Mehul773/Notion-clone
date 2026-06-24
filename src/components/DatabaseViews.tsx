@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Doc } from "../../convex/_generated/dataModel";
-import { CalendarDays, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
 import { tagColor } from "../lib/utils";
 
 /* Alternative database views: kanban board (widget-style cards), month
@@ -32,6 +32,7 @@ export function BoardView({
 }) {
   const updateCell = useMutation(api.database.updateCell);
   const addRow = useMutation(api.database.addRow);
+  const deleteRow = useMutation(api.database.deleteRow);
   const [dragOverLane, setDragOverLane] = useState<string | null>(null);
   const [groupColId, setGroupColId] = useState<string | null>(null);
 
@@ -129,6 +130,13 @@ export function BoardView({
                   e.dataTransfer.effectAllowed = "move";
                 }}
               >
+                <button
+                  className="db-card-delete"
+                  title="Delete card"
+                  onClick={() => void deleteRow({ rowId: row._id })}
+                >
+                  <Trash2 size={12} />
+                </button>
                 <div className="db-card-title">{rowTitle(row, columns)}</div>
                 <div className="db-card-meta">
                   {dateCol && typeof row.cells[dateCol._id] === "string" && (

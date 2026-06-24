@@ -1,5 +1,6 @@
-import { lazy, Suspense, useMemo, useRef } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useConvex, useQuery } from "convex/react";
+import { Maximize2, Minimize2 } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import { useAppTheme } from "../../lib/useAppTheme";
@@ -17,6 +18,19 @@ export function DrawingView({ drawingId }: { drawingId: string }) {
     api.drawings.get,
     drawingId ? { drawingId: drawingId as Id<"drawings"> } : "skip"
   );
+
+  const [fullscreen, setFullscreen] = useState(false);
+
+  // Esc exits fullscreen (Excalidraw also uses Esc to deselect — exiting
+  // fullscreen on Esc is the expected outer behavior).
+  useEffect(() => {
+    if (!fullscreen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFullscreen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [fullscreen]);
 
   const lastSaved = useRef<string | null>(null);
 
@@ -65,7 +79,17 @@ export function DrawingView({ drawingId }: { drawingId: string }) {
   }
 
   return (
-    <div className="drawing-block" contentEditable={false}>
+    <div
+      className={`drawing-block${fullscreen ? " fullscreen" : ""}`}
+      contentEditable={false}
+    >
+      <button
+        className="drawing-fs-btn"
+        title={fullscreen ? "Exit fullscreen (Esc)" : "Open fullscreen"}
+        onClick={() => setFullscreen((f) => !f)}
+      >
+        {fullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+      </button>
       <Suspense
         fallback={
           <div className="drawing-block loading">

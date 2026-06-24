@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BlockNoteSchema,
   combineByGroup,
@@ -22,8 +22,9 @@ import "@blocknote/mantine/style.css";
 import { useConvex, useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
-import { FileText, MonitorPlay, Network, PenTool, Table } from "lucide-react";
+import { FileText, Laugh, MonitorPlay, Network, PenTool, Table } from "lucide-react";
 import { DatabaseTable } from "./DatabaseTable";
+import { GifPickerModal } from "./GifPickerModal";
 import { EmbedView } from "./blocks/EmbedBlock";
 import { PdfView } from "./blocks/PdfBlock";
 import { DrawingView } from "./blocks/DrawingBlock";
@@ -160,6 +161,16 @@ export function BlockEditor({
   const allPages = useQuery(api.pages.list) ?? [];
   const pagesRef = useRef(allPages);
   pagesRef.current = allPages;
+
+  // GIF/meme picker, opened from the "/" slash menu. The slash item awaits the
+  // user's pick via this resolver so the insert lands in the slash-trigger block.
+  const [gifOpen, setGifOpen] = useState(false);
+  const gifResolve = useRef<((url: string | null) => void) | null>(null);
+  const pickGif = () =>
+    new Promise<string | null>((resolve) => {
+      gifResolve.current = resolve;
+      setGifOpen(true);
+    });
 
   const parsed = useMemo<PartialBlock<typeof schema.blockSchema>[] | undefined>(() => {
     if (!initialContent) return undefined;
@@ -331,6 +342,22 @@ export function BlockEditor({
                   insertOrUpdateBlockForSlashMenu(editor, { type: "mindmap" });
                 },
               },
+              {
+                title: "Meme / GIF",
+                subtext: "Search GIPHY and drop in a meme, emoji-picker style",
+                aliases: ["meme", "gif", "giphy", "sticker", "reaction"],
+                group: "Media",
+                icon: <Laugh size={18} />,
+                onItemClick: async () => {
+                  const url = await pickGif();
+                  if (url) {
+                    insertOrUpdateBlockForSlashMenu(editor, {
+                      type: "image",
+                      props: { url },
+                    });
+                  }
+                },
+              },
             ];
             return filterSuggestionItems(
               combineByGroup(getDefaultReactSlashMenuItems(editor), customItems),
@@ -363,6 +390,19 @@ export function BlockEditor({
           }}
         />
       </BlockNoteView>
+      {gifOpen && (
+        <GifPickerModal
+          onSelect={(url) => {
+            gifResolve.current?.(url);
+            gifResolve.current = null;
+          }}
+          onClose={() => {
+            setGifOpen(false);
+            gifResolve.current?.(null);
+            gifResolve.current = null;
+          }}
+        />
+      )}
     </div>
   );
 }
