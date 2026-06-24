@@ -9,7 +9,7 @@ Notion-style workspace for Windows. Pages, databases, drawings, notes — one de
 Portfolio project: Notion rebuilt as a real desktop app. Evaluate it in two minutes:
 
 1. [Download the installer](#download--install-windows), double-click, done — no Node, no terminal, no accounts, no API keys. (Or [run from source](#run-from-source).)
-2. The built-in tour starts on first launch (with memes). Finish it — it builds a demo page showing every feature.
+2. The built-in tour starts on first launch. Finish it — it builds a demo page showing every feature.
 3. Create a page, type `/`, insert a **database**. Switch it to **Board**, **Calendar**, **Chart**. Add a **Formula** column.
 4. Click **Import Markdown**, paste any `.md` file — tables become live typed databases.
 
@@ -33,7 +33,7 @@ Shows: custom block-editor work (BlockNote + 4 custom block types), realtime bac
 - Emoji icons + covers: gradient gallery, **GIF tab** (GIPHY trending/search), upload, or paste any image URL. Every new page gets a random cover.
 - Export as Markdown/HTML. **Save as template** — reuse from the Templates dialog.
 - **Page links** — type `@` to link another page; backlinks appear automatically. **Side-by-side** — "Open to the right" splits two pages. **Password-protect** any page (SHA-256, local). **Sections** group pages in the sidebar — drag pages in.
-- **Mind maps** — `/mindmap` renders an interactive tree from a Markdown outline (markmap).
+- **Mind maps** — `/mindmap` renders an interactive tree from a Markdown outline (markmap). Open it **fullscreen** to explore (Esc exits).
 
 **Find & focus**
 - `Ctrl+K` — full-text search across titles *and* page content, with match snippets.
@@ -44,10 +44,11 @@ Shows: custom block-editor work (BlockNote + 4 custom block types), realtime bac
 **Import Markdown** — paste text or drop a `.md` file → formatted page. Frontmatter sets title/icon. Tables → databases with inferred column types (dates, numbers, checkboxes, URLs, repeated values → select tags). One-click **Copy AI prompt** so any AI writes a perfect file for you.
 
 **More**
-- **Onboarding tour** with random meme GIFs per step (🎲 button rerolls — zero API calls, hardcoded pool). Finishing builds a "Getting started" demo page.
+- **Onboarding tour** — clean step-by-step walkthrough on first launch, replayable from the sidebar. Finishing builds a "Getting started" demo page.
 - **Daily notes** — one click, today's journal page under 📓 Journal.
 - **AI workspace generator** — describe a project, Claude builds pages + seeded databases (optional, needs an Anthropic key).
-- **Drawings** — `/drawing` is a full Excalidraw whiteboard.
+- **Drawings** — `/drawing` is a full Excalidraw whiteboard, with a **fullscreen** mode (Esc exits).
+- **GIFs** — type `/meme` to search GIPHY and drop a GIF into any page.
 - Fonts: size steppers, Default/Serif/Mono, or paste any **Google Font** name/link. **Simple mode** hides the advanced stuff. Optional **horizontal `/` menu**. **Shortcuts** panel with **rebindable keys**. Dark & light themes. Realtime sync across windows.
 
 ## Download & install (Windows)

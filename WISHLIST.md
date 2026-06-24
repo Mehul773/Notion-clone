@@ -79,6 +79,16 @@ context to start cold. Done items reference where they live in the code.
 | `/meme` slash item → GIPHY picker → inserts image block | `GifPickerModal.tsx`, slash item in `BlockEditor.tsx` |
 | "Copy AI prompt" button on mind map block (paste outline back to import) | `MINDMAP_AI_PROMPT` + button in `MindMapBlock.tsx` |
 
+## ✅ Done (sixth wave — fullscreen blocks + cleaner tour)
+
+| Feature | Where |
+|---------|-------|
+| Onboarding memes **removed** — tour is clean text-only popovers (more pro for recruiters). Supersedes the meme rows in waves 3 & 5. | `src/lib/tour.ts` (meme pool/reroll/preload deleted), tour CSS trimmed in `styles.css` |
+| Mind map **fullscreen** (toolbar toggle, Esc to exit, markmap refits to fill screen) | `MindMapBlock.tsx` + `.mindmap-block.fullscreen` in `styles.css` |
+| Drawing **fullscreen** (floating button, Esc to exit, Excalidraw fills viewport) | `DrawingBlock.tsx` + `.drawing-block.fullscreen` / `.drawing-fs-btn` in `styles.css` |
+
+> Note: `/meme` slash command (insert a GIF into a page) is kept — it's separate from the onboarding memes.
+
 ## 🔴 Big bets (future / not built yet)
 
 - [ ] **Timeline / Gantt view (multi-year)** — horizontal time axis over database rows with start/end date columns; library: vis-timeline (MIT). Design for 2-5 year spans (zoom levels: month/quarter/year).
